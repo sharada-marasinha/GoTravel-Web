@@ -36,7 +36,7 @@
                         </div>
                     </div>
                     <div class="mt-3">
-                        <a href="{% url 'booking_detail' booking.id %}" class="btn btn-primary btn-sm">View Details</a>
+                        <a href="{% url 'booking_detail' booking.id %}" class="btn btn-success btn-sm">View Details</a>
                         {% if booking.package %}
                         <a href="{% url 'package_detail' booking.package.id %}"
                             class="btn btn-outline-secondary btn-sm">View Package</a>

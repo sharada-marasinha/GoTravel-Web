@@ -192,13 +192,43 @@ def booking_history(request):
 def destinations(request):
     """List all destinations"""
     try:
+        # Debug: Check total destinations in database
+        total_destinations = Destination.objects.all().count()
+        print(f"Total destinations in database: {total_destinations}")
+        
         destinations = Destination.objects.filter(is_active=True)
-    except:
+        active_destinations = destinations.count()
+        print(f"Active destinations: {active_destinations}")
+    except Exception as e:
+        print(f"Error fetching destinations: {e}")
         destinations = []
+    
+    # Search functionality
+    search_query = request.GET.get('search', '')
+    if search_query:
+        destinations = destinations.filter(
+            Q(name__icontains=search_query) |
+            Q(city__icontains=search_query) |
+            Q(country__icontains=search_query)
+        )
+        print(f"Destinations after search '{search_query}': {destinations.count()}")
+    
+    # Filter by country
+    country = request.GET.get('country', '')
+    if country:
+        destinations = destinations.filter(country__icontains=country)
+        print(f"Destinations after country filter '{country}': {destinations.count()}")
+    
+    # Pagination
+    paginator = Paginator(destinations, 12)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
     
     template = loader.get_template('travel/destinations.html')
     context = {
-        'destinations': destinations,
+        'page_obj': page_obj,
+        'search_query': search_query,
+        'selected_country': country,
     }
     return HttpResponse(template.render(context, request))
 

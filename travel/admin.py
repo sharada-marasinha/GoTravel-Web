@@ -23,6 +23,9 @@ class DestinationAdmin(admin.ModelAdmin):
     ordering = ('name',)
     actions = ['mark_as_popular', 'unmark_as_popular', 'activate_destinations', 'deactivate_destinations']
     
+    # Make it easier to add destinations
+    fields = ('name', 'city', 'country', 'description', 'image', 'is_active', 'is_popular')
+    
     def package_count(self, obj):
         return obj.package_set.count()
     package_count.short_description = 'Packages'

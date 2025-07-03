@@ -59,7 +59,7 @@
                                 <p class="card-text small">${{ hotel.price_per_night }}/night</p>
                             </div>
                             <div class="card-footer">
-                                <a href="{% url 'hotel_detail' hotel.id %}" class="btn btn-sm btn-outline-primary w-100">View Hotel</a>
+                                <a href="{% url 'hotel_detail' hotel.id %}" class="btn btn-sm btn-outline-success w-100">View Hotel</a>
                             </div>
                         </div>
                     </div>
@@ -91,7 +91,7 @@
                             </small>
                         </p>
                         <div class="d-flex justify-content-between align-items-center">
-                            <span class="h5 text-primary">${{ package.price }}</span>
+                            <span class="h5 text-success">${{ package.price }}</span>
                             <div class="rating">
                                 {% for i in "12345" %}
                                 {% if forloop.counter <= package.average_rating %} <i class="fas fa-star text-warning">
@@ -104,7 +104,7 @@
                         </div>
                     </div>
                     <div class="card-footer">
-                        <a href="{% url 'package_detail' package.id %}" class="btn btn-primary w-100">View Details</a>
+                        <a href="{% url 'package_detail' package.id %}" class="btn btn-success w-100">View Details</a>
                     </div>
                 </div>
             </div>
@@ -129,22 +129,22 @@
                             <div class="card-body">
                                 <div class="d-flex align-items-center mb-2">
                                     {% if transport.transport_type == 'flight' %}
-                                        <i class="fas fa-plane text-primary me-2"></i>
+                                        <i class="fas fa-plane text-success me-2"></i>
                                     {% elif transport.transport_type == 'bus' %}
-                                        <i class="fas fa-bus text-primary me-2"></i>
+                                        <i class="fas fa-bus text-success me-2"></i>
                                     {% elif transport.transport_type == 'train' %}
-                                        <i class="fas fa-train text-primary me-2"></i>
+                                        <i class="fas fa-train text-success me-2"></i>
                                     {% else %}
-                                        <i class="fas fa-car text-primary me-2"></i>
+                                        <i class="fas fa-car text-success me-2"></i>
                                     {% endif %}
                                     <h6 class="card-title mb-0">{{ transport.name }}</h6>
                                 </div>
                                 <p class="card-text small">
                                     To: <strong>{{ transport.to_destination.name }}</strong><br>
                                     Time: {{ transport.departure_time }} - {{ transport.arrival_time }}<br>
-                                    Price: <span class="text-primary">${{ transport.price }}</span>
+                                    Price: <span class="text-success">${{ transport.price }}</span>
                                 </p>
-                                <a href="{% url 'transport_detail' transport.id %}" class="btn btn-sm btn-outline-primary">View Details</a>
+                                <a href="{% url 'transport_detail' transport.id %}" class="btn btn-sm btn-outline-success">View Details</a>
                             </div>
                         </div>
                     </div>

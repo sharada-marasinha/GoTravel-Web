@@ -31,7 +31,7 @@
                     <small class="text-muted">{{ review.created_at|date:"M d, Y" }}</small>
                     <div class="mt-3">
                         <a href="{% url 'package_detail' review.package.id %}"
-                            class="btn btn-sm btn-outline-primary">View Package</a>
+                            class="btn btn-sm btn-outline-success">View Package</a>
                         <a href="{% url 'write_review' review.package.id %}"
                             class="btn btn-sm btn-outline-secondary">Edit</a>
                         <a href="{% url 'delete_review' review.id %}" class="btn btn-sm btn-outline-danger"

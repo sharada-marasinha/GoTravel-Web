@@ -6,24 +6,24 @@
         <h1 class="display-4 mb-4">Discover Your Next Adventure</h1>
         <p class="lead mb-4">Explore amazing destinations, book unforgettable experiences, and create memories that last
             a lifetime.</p>
-        <a href="{% url 'package_list' %}" class="btn btn-primary btn-lg">Explore Packages</a>
+        <a href="{% url 'package_list' %}" class="btn btn-success btn-lg">Explore Packages</a>
     </div>
 </div>
 
 <div class="container my-5">
     <div class="row">
         <div class="col-md-4 text-center mb-4">
-            <i class="fas fa-map-marked-alt fa-3x text-primary mb-3"></i>
+            <i class="fas fa-map-marked-alt fa-3x text-success mb-3"></i>
             <h4>Amazing Destinations</h4>
             <p>Discover breathtaking locations around the world with our carefully curated destination guides.</p>
         </div>
         <div class="col-md-4 text-center mb-4">
-            <i class="fas fa-calendar-check fa-3x text-primary mb-3"></i>
+            <i class="fas fa-calendar-check fa-3x text-success mb-3"></i>
             <h4>Easy Booking</h4>
             <p>Book your dream vacation with just a few clicks. Our streamlined process makes planning effortless.</p>
         </div>
         <div class="col-md-4 text-center mb-4">
-            <i class="fas fa-headset fa-3x text-primary mb-3"></i>
+            <i class="fas fa-headset fa-3x text-success mb-3"></i>
             <h4>24/7 Support</h4>
             <p>Our dedicated support team is always here to help you before, during, and after your trip.</p>
         </div>
@@ -33,7 +33,7 @@
 <div class="container my-5">
     <div class="d-flex justify-content-between align-items-center mb-5">
         <h2><i class="fas fa-star text-warning"></i> Featured Packages</h2>
-        <a href="{% url 'package_list' %}" class="btn btn-outline-primary">View All Packages</a>
+        <a href="{% url 'package_list' %}" class="btn btn-outline-success">View All Packages</a>
     </div>
     
     {% if featured_packages %}
@@ -62,7 +62,7 @@
                                 </small>
                             </p>
                             <div class="d-flex justify-content-between align-items-center">
-                                <span class="h5 text-primary">${{ package.price }}</span>
+                                <span class="h5 text-success">${{ package.price }}</span>
                                 <div class="rating">
                                     {% for i in "12345" %}
                                     {% if forloop.counter <= package.average_rating %} <i class="fas fa-star"></i>
@@ -74,7 +74,7 @@
                             </div>
                         </div>
                         <div class="card-footer">
-                            <a href="{% url 'package_detail' package.id %}" class="btn btn-primary w-100">View Details</a>
+                            <a href="{% url 'package_detail' package.id %}" class="btn btn-success w-100">View Details</a>
                         </div>
                     </div>
                 </div>
@@ -85,7 +85,7 @@
             <i class="fas fa-star fa-4x text-muted mb-3"></i>
             <h4 class="text-muted">No Featured Packages Available</h4>
             <p class="text-muted">Our team is working on featuring amazing packages for you.</p>
-            <a href="{% url 'package_list' %}" class="btn btn-primary">Browse All Packages</a>
+            <a href="{% url 'package_list' %}" class="btn btn-success">Browse All Packages</a>
         </div>
     {% endif %}
 </div>
@@ -93,8 +93,8 @@
 <div class="bg-light py-5">
     <div class="container">
         <div class="d-flex justify-content-between align-items-center mb-5">
-            <h2><i class="fas fa-hotel text-primary"></i> Featured Hotels</h2>
-            <a href="{% url 'hotels' %}" class="btn btn-outline-primary">View All Hotels</a>
+            <h2><i class="fas fa-hotel text-success"></i> Featured Hotels</h2>
+            <a href="{% url 'hotels' %}" class="btn btn-outline-success">View All Hotels</a>
         </div>
         
         {% if featured_hotels %}
@@ -136,12 +136,12 @@
                                     <p class="card-text">{{ hotel.description|truncatewords:15 }}</p>
                                 {% endif %}
                                 <div class="d-flex justify-content-between align-items-center">
-                                    <span class="h5 text-primary">${{ hotel.price_per_night }}/night</span>
+                                    <span class="h5 text-success">${{ hotel.price_per_night }}/night</span>
                                     <small class="text-muted">{{ hotel.star_rating }} Star Hotel</small>
                                 </div>
                             </div>
                             <div class="card-footer">
-                                <a href="{% url 'hotel_detail' hotel.id %}" class="btn btn-primary w-100">View Details</a>
+                                <a href="{% url 'hotel_detail' hotel.id %}" class="btn btn-success w-100">View Details</a>
                             </div>
                         </div>
                     </div>
@@ -152,7 +152,7 @@
                 <i class="fas fa-hotel fa-4x text-muted mb-3"></i>
                 <h4 class="text-muted">No Featured Hotels Available</h4>
                 <p class="text-muted">We're curating the best hotels for you.</p>
-                <a href="{% url 'hotels' %}" class="btn btn-primary">Browse All Hotels</a>
+                <a href="{% url 'hotels' %}" class="btn btn-success">Browse All Hotels</a>
             </div>
         {% endif %}
     </div>
@@ -161,7 +161,7 @@
 <div class="container my-5">
     <div class="d-flex justify-content-between align-items-center mb-5">
         <h2><i class="fas fa-fire text-danger"></i> Popular Destinations</h2>
-        <a href="{% url 'destinations' %}" class="btn btn-outline-primary">View All Destinations</a>
+        <a href="{% url 'destinations' %}" class="btn btn-outline-success">View All Destinations</a>
     </div>
     
     {% if destinations %}
@@ -185,7 +185,7 @@
                             <h6 class="card-title">{{ destination.name }}</h6>
                             <p class="card-text small text-muted">{{ destination.city }}, {{ destination.country }}</p>
                             <a href="{% url 'destination_detail' destination.id %}"
-                                class="btn btn-sm btn-outline-primary">Explore</a>
+                                class="btn btn-sm btn-outline-success">Explore</a>
                         </div>
                     </div>
                 </div>
@@ -196,7 +196,7 @@
             <i class="fas fa-map-marker-alt fa-4x text-muted mb-3"></i>
             <h4 class="text-muted">No Popular Destinations Available</h4>
             <p class="text-muted">We're curating the most popular destinations for you.</p>
-            <a href="{% url 'destinations' %}" class="btn btn-primary">Browse All Destinations</a>
+            <a href="{% url 'destinations' %}" class="btn btn-success">Browse All Destinations</a>
         </div>
     {% endif %}
 </div>
@@ -204,7 +204,7 @@
 <div class="container my-5">
     <div class="d-flex justify-content-between align-items-center mb-5">
         <h2><i class="fas fa-plane text-success"></i> Popular Transports</h2>
-        <a href="{% url 'transports' %}" class="btn btn-outline-primary">View All Transports</a>
+        <a href="{% url 'transports' %}" class="btn btn-outline-success">View All Transports</a>
     </div>
     
     {% if popular_transports %}
@@ -251,11 +251,11 @@
                                 <p class="card-text">{{ transport.description|truncatewords:15 }}</p>
                             {% endif %}
                             <div class="d-flex justify-content-between align-items-center">
-                                <span class="h5 text-primary">${{ transport.price }}</span>
+                                <span class="h5 text-success">${{ transport.price }}</span>
                             </div>
                         </div>
                         <div class="card-footer">
-                            <a href="{% url 'transport_detail' transport.id %}" class="btn btn-primary w-100">View Details</a>
+                            <a href="{% url 'transport_detail' transport.id %}" class="btn btn-success w-100">View Details</a>
                         </div>
                     </div>
                 </div>
@@ -266,7 +266,7 @@
             <i class="fas fa-plane fa-4x text-muted mb-3"></i>
             <h4 class="text-muted">No Popular Transports Available</h4>
             <p class="text-muted">We're curating the best transport options for you.</p>
-            <a href="{% url 'transports' %}" class="btn btn-primary">Browse All Transports</a>
+            <a href="{% url 'transports' %}" class="btn btn-success">Browse All Transports</a>
         </div>
     {% endif %}
 </div>

@@ -89,7 +89,7 @@
                     <h5>{{ booking.package.name }}</h5>
                     <p class="text-muted">{{ booking.package.destination.name }}</p>
                     <p><strong>Duration:</strong> {{ booking.package.duration_days }} days</p>
-                    <a href="{% url 'package_detail' booking.package.id %}" class="btn btn-outline-primary">
+                    <a href="{% url 'package_detail' booking.package.id %}" class="btn btn-outline-success">
                         View Package Details
                     </a>
                     {% endif %}

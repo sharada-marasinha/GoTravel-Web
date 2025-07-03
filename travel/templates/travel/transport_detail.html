@@ -42,14 +42,14 @@
                     
                     <div class="row mb-4">
                         <div class="col-md-6">
-                            <h5><i class="fas fa-map-marker-alt text-primary"></i> Route</h5>
+                            <h5><i class="fas fa-map-marker-alt text-success"></i> Route</h5>
                             <div class="d-flex align-items-center">
                                 <div class="text-center">
                                     <strong>{{ transport.from_destination.name }}</strong>
                                     <br><small class="text-muted">{{ transport.from_destination.city }}</small>
                                 </div>
                                 <div class="mx-3">
-                                    <i class="fas fa-arrow-right fa-2x text-primary"></i>
+                                    <i class="fas fa-arrow-right fa-2x text-success"></i>
                                 </div>
                                 <div class="text-center">
                                     <strong>{{ transport.to_destination.name }}</strong>
@@ -58,7 +58,7 @@
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <h5><i class="fas fa-clock text-primary"></i> Schedule</h5>
+                            <h5><i class="fas fa-clock text-success"></i> Schedule</h5>
                             <p><strong>Departure:</strong> {{ transport.departure_time }}</p>
                             <p><strong>Arrival:</strong> {{ transport.arrival_time }}</p>
                         </div>
@@ -80,8 +80,8 @@
                                         <div class="card-body">
                                             <h6 class="card-title">{{ package.name }}</h6>
                                             <p class="card-text">{{ package.description|truncatewords:15 }}</p>
-                                            <p class="text-primary">${{ package.price }} - {{ package.duration_days }} days</p>
-                                            <a href="{% url 'package_detail' package.id %}" class="btn btn-sm btn-primary">View Package</a>
+                                            <p class="text-success">${{ package.price }} - {{ package.duration_days }} days</p>
+                                            <a href="{% url 'package_detail' package.id %}" class="btn btn-sm btn-success">View Package</a>
                                         </div>
                                     </div>
                                 </div>
@@ -89,7 +89,7 @@
                         </div>
                     {% else %}
                         <p class="text-muted">No packages available for this transport route at the moment.</p>
-                        <a href="{% url 'package_list' %}" class="btn btn-primary">Browse All Packages</a>
+                        <a href="{% url 'package_list' %}" class="btn btn-success">Browse All Packages</a>
                     {% endif %}
                 </div>
             </div>
@@ -102,7 +102,7 @@
                 </div>
                 <div class="card-body">
                     <div class="text-center mb-3">
-                        <h2 class="text-primary">${{ transport.price }}</h2>
+                        <h2 class="text-success">${{ transport.price }}</h2>
                         <p class="text-muted">per person</p>
                     </div>
                     
@@ -116,7 +116,7 @@
                     </div>
                     
                     {% if user.is_authenticated %}
-                        <a href="{% url 'package_list' %}?from_destination={{ transport.from_destination.id }}&to_destination={{ transport.to_destination.id }}&type=transport" class="btn btn-primary btn-lg w-100 mb-2">
+                        <a href="{% url 'package_list' %}?from_destination={{ transport.from_destination.id }}&to_destination={{ transport.to_destination.id }}&type=transport" class="btn btn-success btn-lg w-100 mb-2">
                             View Transport Packages
                         </a>
                     {% else %}
@@ -143,11 +143,11 @@
                 <div class="card-body">
                     <div class="row text-center">
                         <div class="col-6">
-                            <i class="fas fa-clock fa-2x text-primary mb-2"></i>
+                            <i class="fas fa-clock fa-2x text-success mb-2"></i>
                             <p class="small">Duration<br><strong>{{ transport.departure_time }} - {{ transport.arrival_time }}</strong></p>
                         </div>
                         <div class="col-6">
-                            <i class="fas fa-route fa-2x text-primary mb-2"></i>
+                            <i class="fas fa-route fa-2x text-success mb-2"></i>
                             <p class="small">Route<br><strong>Direct</strong></p>
                         </div>
                     </div>

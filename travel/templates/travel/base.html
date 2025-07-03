@@ -10,7 +10,7 @@
     <style>
         .navbar-brand {
             font-weight: bold;
-            color: #007bff !important;
+            color:rgb(0, 0, 0) !important;
         }
 
         .hero-section {
@@ -72,10 +72,10 @@
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container">
-            <a class="navbar-brand" href="{% url 'home' %}">
-                <i class="fas fa-plane"></i> GoTravel
+    <nav class="navbar navbar-expand-lg navbar-dark bg-success fixed-top">
+        <div class="container ">
+            <a class="navbar-brand text-white" href="{% url 'home' %}">
+                <i class="fas fa-plane text-white"></i> <span class="text-white">ATV</span> 
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -83,25 +83,25 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'home' %}">Home</a>
+                        <a class="nav-link text-white" href="{% url 'home' %}">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'package_list' %}">Packages</a>
+                        <a class="nav-link text-white" href="{% url 'package_list' %}">Packages</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'destinations' %}">Destinations</a>
+                        <a class="nav-link text-white" href="{% url 'destinations' %}">Destinations</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'hotels' %}">Hotels</a>
+                        <a class="nav-link text-white" href="{% url 'hotels' %}">Hotels</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'transports' %}">Transports</a>
+                        <a class="nav-link text-white" href="{% url 'transports' %}">Transports</a>
                     </li>
                 </ul>
                 <ul class="navbar-nav">
                     {% if user.is_authenticated %}
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle user-info" href="#" id="navbarDropdown" role="button"
+                        <a class="nav-link dropdown-toggle user-info text-white" href="#" id="navbarDropdown" role="button"
                             data-bs-toggle="dropdown">
                             {% if user.userprofile.profile_picture %}
                             <img src="{{ user.userprofile.profile_picture.url }}" alt="Profile" class="profile-pic">

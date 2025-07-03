@@ -44,7 +44,7 @@
                                 {% endfor %}
                             </select>
                         </div>
-                        <button type="submit" class="btn btn-primary w-100 mt-3">Filter</button>
+                        <button type="submit" class="btn btn-success w-100 mt-3">Filter</button>
                         <a href="{% url 'transports' %}" class="btn btn-secondary w-100 mt-2">Clear Filters</a>
                     </form>
                 </div>
@@ -71,13 +71,13 @@
                             <div class="card-body">
                                 <div class="d-flex align-items-center mb-3">
                                     {% if transport.transport_type == 'flight' %}
-                                        <i class="fas fa-plane fa-2x text-primary me-3"></i>
+                                        <i class="fas fa-plane fa-2x text-success me-3"></i>
                                     {% elif transport.transport_type == 'bus' %}
-                                        <i class="fas fa-bus fa-2x text-primary me-3"></i>
+                                        <i class="fas fa-bus fa-2x text-success me-3"></i>
                                     {% elif transport.transport_type == 'train' %}
-                                        <i class="fas fa-train fa-2x text-primary me-3"></i>
+                                        <i class="fas fa-train fa-2x text-success me-3"></i>
                                     {% else %}
-                                        <i class="fas fa-car fa-2x text-primary me-3"></i>
+                                        <i class="fas fa-car fa-2x text-success me-3"></i>
                                     {% endif %}
                                     <div>
                                         <h5 class="card-title mb-0">{{ transport.name }}</h5>
@@ -99,11 +99,11 @@
                                     <p class="card-text">{{ transport.description|truncatewords:15 }}</p>
                                 {% endif %}
                                 <div class="d-flex justify-content-between align-items-center">
-                                    <span class="h5 text-primary">${{ transport.price }}</span>
+                                    <span class="h5 text-success">${{ transport.price }}</span>
                                 </div>
                             </div>
                             <div class="card-footer">
-                                <a href="{% url 'transport_detail' transport.id %}" class="btn btn-primary w-100">View Details</a>
+                                <a href="{% url 'transport_detail' transport.id %}" class="btn btn-success w-100">View Details</a>
                             </div>
                         </div>
                     </div>
@@ -116,6 +116,36 @@
                     </div>
                 {% endfor %}
             </div>
+            
+            {% if page_obj.has_other_pages %}
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_transport_type %}&transport_type={{ selected_transport_type }}{% endif %}{% if selected_from_destination %}&from_destination={{ selected_from_destination }}{% endif %}{% if selected_to_destination %}&to_destination={{ selected_to_destination }}{% endif %}">Previous</a>
+                            </li>
+                        {% endif %}
+                        
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ num }}</span>
+                                </li>
+                            {% else %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_transport_type %}&transport_type={{ selected_transport_type }}{% endif %}{% if selected_from_destination %}&from_destination={{ selected_from_destination }}{% endif %}{% if selected_to_destination %}&to_destination={{ selected_to_destination }}{% endif %}">{{ num }}</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_transport_type %}&transport_type={{ selected_transport_type }}{% endif %}{% if selected_from_destination %}&from_destination={{ selected_from_destination }}{% endif %}{% if selected_to_destination %}&to_destination={{ selected_to_destination }}{% endif %}">Next</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            {% endif %}
         </div>
     </div>
 </div>

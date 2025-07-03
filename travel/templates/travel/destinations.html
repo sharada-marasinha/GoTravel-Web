@@ -4,37 +4,108 @@
 
 {% block content %}
 <div class="container my-5">
-    <h1 class="text-center mb-5">Explore Amazing Destinations</h1>
-
     <div class="row">
-        {% for destination in destinations %}
-        <div class="col-md-4 col-sm-6 mb-4">
-            <div class="card h-100">
-                <img src="{{ destination.image.url }}" class="card-img-top" alt="{{ destination.name }}"
-                    style="height: 250px; object-fit: cover;">
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Filter Destinations</h5>
+                </div>
                 <div class="card-body">
-                    <h5 class="card-title">{{ destination.name }}</h5>
-                    <p class="card-text">
-                        <i class="fas fa-map-marker-alt text-primary"></i>
-                        {{ destination.city }}, {{ destination.country }}
-                    </p>
-                    <p class="card-text">{{ destination.description|truncatewords:20 }}</p>
-                </div>
-                <div class="card-footer">
-                    <a href="{% url 'destination_detail' destination.id %}" class="btn btn-primary w-100">
-                        Explore Packages
-                    </a>
+                    <form method="get">
+                        <div class="mb-3">
+                            <label for="search" class="form-label">Search</label>
+                            <input type="text" class="form-control" id="search" name="search" value="{{ search_query }}" placeholder="Search destinations...">
+                        </div>
+                        <div class="mb-3">
+                            <label for="country" class="form-label">Country</label>
+                            <input type="text" class="form-control" id="country" name="country" value="{{ selected_country }}" placeholder="Filter by country">
+                        </div>
+                        <button type="submit" class="btn btn-success w-100 mt-3">Filter</button>
+                        <a href="{% url 'destinations' %}" class="btn btn-secondary w-100 mt-2">Clear Filters</a>
+                    </form>
                 </div>
             </div>
         </div>
-        {% empty %}
-        <div class="col-12">
-            <div class="alert alert-info text-center">
-                <h4>No destinations available</h4>
-                <p>Please check back later for exciting destinations!</p>
+        
+        <div class="col-md-9">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>Explore Amazing Destinations</h2>
+                <p class="text-muted">{{ page_obj.paginator.count }} destinations found</p>
             </div>
+            
+            <div class="row">
+                {% for destination in page_obj %}
+                    <div class="col-md-4 col-sm-6 mb-4">
+                        <div class="card h-100">
+                            {% if destination.is_popular %}
+                                <div class="position-relative">
+                                    <span class="badge bg-success position-absolute top-0 end-0 m-2">
+                                        <i class="fas fa-fire"></i> Popular
+                                    </span>
+                                </div>
+                            {% endif %}
+                            {% if destination.image %}
+                                <img src="{{ destination.image.url }}" class="card-img-top" alt="{{ destination.name }}" style="height: 200px; object-fit: cover;">
+                            {% else %}
+                                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                                    <i class="fas fa-map-marker-alt fa-3x text-muted"></i>
+                                </div>
+                            {% endif %}
+                            <div class="card-body">
+                                <h5 class="card-title">{{ destination.name }}</h5>
+                                <p class="card-text">
+                                    <i class="fas fa-map-marker-alt text-primary"></i> 
+                                    {{ destination.city }}, {{ destination.country }}
+                                </p>
+                                <p class="card-text">{{ destination.description|truncatewords:20 }}</p>
+                            </div>
+                            <div class="card-footer">
+                                <a href="{% url 'destination_detail' destination.id %}" class="btn btn-success w-100">
+                                    Explore Packages
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="col-12">
+                        <div class="alert alert-info">
+                            <h4>No destinations found</h4>
+                            <p>No destinations match your search criteria. <a href="{% url 'destinations' %}">Clear filters</a> to see all destinations.</p>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            
+            {% if page_obj.has_other_pages %}
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_country %}&country={{ selected_country }}{% endif %}">Previous</a>
+                            </li>
+                        {% endif %}
+                        
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ num }}</span>
+                                </li>
+                            {% else %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_country %}&country={{ selected_country }}{% endif %}">{{ num }}</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_country %}&country={{ selected_country }}{% endif %}">Next</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            {% endif %}
         </div>
-        {% endfor %}
     </div>
 </div>
 {% endblock %}

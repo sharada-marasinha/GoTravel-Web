@@ -32,6 +32,7 @@ class Destination(models.Model):
     description = models.TextField()
     image = models.ImageField(upload_to='destinations/')
     is_active = models.BooleanField(default=True)
+    is_popular = models.BooleanField(default=False, help_text="Mark as popular destination")
     created_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
@@ -56,6 +57,7 @@ class Package(models.Model):
     excludes = models.TextField(help_text="What's not included")
     image = models.ImageField(upload_to='packages/')
     is_active = models.BooleanField(default=True)
+    is_featured = models.BooleanField(default=False, help_text="Mark as featured package")
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

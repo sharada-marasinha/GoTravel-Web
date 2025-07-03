@@ -16,8 +16,23 @@ import json
 def home(request):
     """Home page with featured packages"""
     try:
-        featured_packages = Package.objects.filter(is_active=True)[:6]
-        destinations = Destination.objects.filter(is_active=True)[:8]
+        # Get featured packages first, then fallback to regular active packages
+        featured_packages = Package.objects.filter(is_active=True, is_featured=True)[:6]
+        if featured_packages.count() < 6:
+            # If not enough featured packages, fill with other active packages
+            additional_packages = Package.objects.filter(is_active=True).exclude(
+                id__in=featured_packages.values_list('id', flat=True)
+            )[:6-featured_packages.count()]
+            featured_packages = list(featured_packages) + list(additional_packages)
+        
+        # Get popular destinations first, then fallback to regular active destinations
+        destinations = Destination.objects.filter(is_active=True, is_popular=True)[:8]
+        if destinations.count() < 8:
+            # If not enough popular destinations, fill with other active destinations
+            additional_destinations = Destination.objects.filter(is_active=True).exclude(
+                id__in=destinations.values_list('id', flat=True)
+            )[:8-destinations.count()]
+            destinations = list(destinations) + list(additional_destinations)
     except:
         featured_packages = []
         destinations = []

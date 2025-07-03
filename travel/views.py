@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth import login, authenticate
+from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
@@ -10,7 +10,7 @@ from django.template import loader
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 from .models import Package, Destination, Hotel, Transport, Booking, Review, UserProfile
-from .forms import BookingForm, ReviewForm, UserProfileForm
+from .forms import BookingForm, ReviewForm, UserProfileForm, CustomUserCreationForm
 import json
 
 def home(request):
@@ -21,6 +21,13 @@ def home(request):
     except:
         featured_packages = []
         destinations = []
+    
+    # Ensure user profile exists
+    if request.user.is_authenticated:
+        try:
+            UserProfile.objects.get_or_create(user=request.user)
+        except:
+            pass
     
     template = loader.get_template('travel/home.html')
     context = {
@@ -201,20 +208,27 @@ def destination_detail(request, destination_id):
 def register(request):
     """User registration"""
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
+        form = CustomUserCreationForm(request.POST)
         profile_form = UserProfileForm(request.POST, request.FILES)
         
         if form.is_valid() and profile_form.is_valid():
             user = form.save()
-            profile = profile_form.save(commit=False)
-            profile.user = user
+            
+            # Get or create profile to avoid IntegrityError
+            profile, created = UserProfile.objects.get_or_create(user=user)
+            
+            # Update profile with form data
+            profile.phone = profile_form.cleaned_data.get('phone', '')
+            profile.address = profile_form.cleaned_data.get('address', '')
+            if profile_form.cleaned_data.get('profile_picture'):
+                profile.profile_picture = profile_form.cleaned_data['profile_picture']
             profile.save()
             
             username = form.cleaned_data.get('username')
             messages.success(request, f'Account created for {username}!')
             return redirect('login')
     else:
-        form = UserCreationForm()
+        form = CustomUserCreationForm()
         profile_form = UserProfileForm()
     
     template = loader.get_template('travel/register.html')
@@ -311,3 +325,80 @@ def add_review(request, package_id):
     except:
         messages.error(request, 'Package not found.')
         return redirect('package_list')
+
+@login_required
+def write_review(request, package_id):
+    """Write or update a review for a package"""
+    try:
+        package = get_object_or_404(Package, id=package_id, is_active=True)
+        
+        # Check if user has booked this package
+        has_booking = Booking.objects.filter(
+            user=request.user,
+            package=package,
+            status__in=['confirmed', 'completed']
+        ).exists()
+        
+        if not has_booking:
+            messages.error(request, 'You can only review packages you have booked.')
+            return redirect('package_detail', package_id=package_id)
+        
+        # Check if user has already reviewed this package
+        existing_review = Review.objects.filter(user=request.user, package=package).first()
+        
+        if request.method == 'POST':
+            form = ReviewForm(request.POST, instance=existing_review)
+            if form.is_valid():
+                review = form.save(commit=False)
+                review.user = request.user
+                review.package = package
+                review.save()
+                messages.success(request, 'Review submitted successfully!')
+                return redirect('package_detail', package_id=package_id)
+        else:
+            form = ReviewForm(instance=existing_review)
+        
+        template = loader.get_template('travel/write_review.html')
+        context = {
+            'package': package,
+            'form': form,
+            'existing_review': existing_review,
+        }
+        return HttpResponse(template.render(context, request))
+    except:
+        messages.error(request, 'Package not found.')
+        return redirect('package_list')
+
+@login_required
+def my_reviews(request):
+    """Display user's reviews"""
+    try:
+        reviews = Review.objects.filter(user=request.user).order_by('-created_at')
+    except:
+        reviews = []
+    
+    template = loader.get_template('travel/my_reviews.html')
+    context = {
+        'reviews': reviews,
+    }
+    return HttpResponse(template.render(context, request))
+
+@login_required
+def delete_review(request, review_id):
+    """Delete a user's review"""
+    try:
+        review = get_object_or_404(Review, id=review_id, user=request.user)
+        package_id = review.package.id
+        review.delete()
+        messages.success(request, 'Review deleted successfully!')
+        return redirect('package_detail', package_id=package_id)
+    except:
+        messages.error(request, 'Review not found.')
+        return redirect('package_list')
+
+@login_required
+def logout_view(request):
+    """Logout view"""
+    logout(request)
+    messages.success(request, 'You have been logged out successfully.')
+    return redirect('home')

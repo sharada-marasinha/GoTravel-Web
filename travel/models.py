@@ -11,15 +11,19 @@ class UserProfile(models.Model):
         ('customer', 'Customer'),
     ]
     
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, unique=True)
     role = models.CharField(max_length=10, choices=USER_ROLES, default='customer')
     phone = models.CharField(max_length=15, blank=True)
     address = models.TextField(blank=True)
-    profile_picture = models.ImageField(upload_to='profiles/', blank=True)
+    profile_picture = models.ImageField(upload_to='profiles/', blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
         return f"{self.user.username} - {self.role}"
+    
+    class Meta:
+        verbose_name = "User Profile"
+        verbose_name_plural = "User Profiles"
 
 class Destination(models.Model):
     name = models.CharField(max_length=200)
@@ -135,6 +139,7 @@ class Review(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     package = models.ForeignKey(Package, on_delete=models.CASCADE)
     rating = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
+    title = models.CharField(max_length=200)
     comment = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     

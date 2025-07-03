@@ -5,4 +5,7 @@ class TravelConfig(AppConfig):
     name = 'travel'
     
     def ready(self):
-        import travel.signals
+        try:
+            import travel.signals
+        except ImportError:
+            pass

@@ -6,9 +6,15 @@ from .models import UserProfile
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
     if created:
-        UserProfile.objects.create(user=instance)
+        # Use get_or_create to prevent IntegrityError
+        UserProfile.objects.get_or_create(user=instance)
 
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
-    if hasattr(instance, 'userprofile'):
-        instance.userprofile.save()
+    try:
+        # Get or create profile if it doesn't exist
+        profile, created = UserProfile.objects.get_or_create(user=instance)
+        profile.save()
+    except Exception:
+        # Handle any other exceptions gracefully
+        pass

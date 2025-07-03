@@ -1,0 +1,135 @@
+{% extends 'travel/base.html' %}
+
+{% block title %}{{ package.name }} - Travel Management System{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <img src="{{ package.image.url }}" class="card-img-top" alt="{{ package.name }}" style="height: 400px; object-fit: cover;">
+                <div class="card-body">
+                    <h1 class="card-title">{{ package.name }}</h1>
+                    <p class="lead">{{ package.description }}</p>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h5><i class="fas fa-map-marker-alt text-primary"></i> Destination</h5>
+                            <p>{{ package.destination.name }}, {{ package.destination.city }}, {{ package.destination.country }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h5><i class="fas fa-clock text-primary"></i> Duration</h5>
+                            <p>{{ package.duration_days }} days</p>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h5><i class="fas fa-users text-primary"></i> Max People</h5>
+                            <p>{{ package.max_people }} people</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h5><i class="fas fa-tag text-primary"></i> Package Type</h5>
+                            <p>{{ package.get_package_type_display }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5><i class="fas fa-check-circle text-success"></i> Includes</h5>
+                            <p>{{ package.includes|linebreaks }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h5><i class="fas fa-times-circle text-danger"></i> Excludes</h5>
+                            <p>{{ package.excludes|linebreaks }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="rating">
+                                {% for i in "12345" %}
+                                    {% if forloop.counter <= package.average_rating %}
+                                        <i class="fas fa-star text-warning"></i>
+                                    {% else %}
+                                        <i class="far fa-star text-warning"></i>
+                                    {% endif %}
+                                {% endfor %}
+                                <span class="ms-2">{{ package.average_rating|floatformat:1 }} / 5</span>
+                            </div>
+                            <span class="badge bg-secondary">{{ reviews.count }} review{{ reviews.count|pluralize }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Reviews Section -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5>Customer Reviews</h5>
+                </div>
+                <div class="card-body">
+                    {% if user.is_authenticated %}
+                        <div class="mb-3">
+                            <a href="{% url 'add_review' package.id %}" class="btn btn-outline-primary">Write a Review</a>
+                        </div>
+                    {% endif %}
+                    
+                    {% for review in reviews %}
+                        <div class="mb-3 pb-3 border-bottom">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <strong>{{ review.user.username }}</strong>
+                                    <div class="rating">
+                                        {% for i in "12345" %}
+                                            {% if forloop.counter <= review.rating %}
+                                                <i class="fas fa-star text-warning"></i>
+                                            {% else %}
+                                                <i class="far fa-star text-warning"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <small class="text-muted">{{ review.created_at|date:"M d, Y" }}</small>
+                            </div>
+                            <p class="mt-2">{{ review.comment }}</p>
+                        </div>
+                    {% empty %}
+                        <p class="text-muted">No reviews yet. Be the first to review this package!</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card sticky-top" style="top: 20px;">
+                <div class="card-header">
+                    <h5>Book This Package</h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        <h2 class="text-primary">${{ package.price }}</h2>
+                        <p class="text-muted">per person</p>
+                    </div>
+                    
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'book_package' package.id %}" class="btn btn-primary btn-lg w-100">Book Now</a>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <p>Please <a href="{% url 'login' %}">login</a> to book this package.</p>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="mt-3">
+                        <small class="text-muted">
+                            <i class="fas fa-shield-alt"></i> Secure booking<br>
+                            <i class="fas fa-phone"></i> 24/7 support<br>
+                            <i class="fas fa-undo"></i> Free cancellation
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

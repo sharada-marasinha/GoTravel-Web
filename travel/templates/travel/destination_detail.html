@@ -1,0 +1,83 @@
+{% extends 'travel/base.html' %}
+
+{% block title %}{{ destination.name }} - Travel Management System{% endblock %}
+
+{% block content %}
+<div class="hero-section" style="background-image: url('{{ destination.image.url }}'); height: 400px; background-size: cover; background-position: center;">
+    <div class="container h-100 d-flex align-items-center">
+        <div class="text-white">
+            <h1 class="display-4">{{ destination.name }}</h1>
+            <p class="lead">{{ destination.city }}, {{ destination.country }}</p>
+        </div>
+    </div>
+</div>
+
+<div class="container my-5">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h3>About {{ destination.name }}</h3>
+                    <p>{{ destination.description|linebreaks }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Quick Facts</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>City:</strong> {{ destination.city }}</p>
+                    <p><strong>Country:</strong> {{ destination.country }}</p>
+                    <p><strong>Available Packages:</strong> {{ packages.count }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="mt-5">
+        <h3>Available Packages for {{ destination.name }}</h3>
+        <div class="row">
+            {% for package in packages %}
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <img src="{{ package.image.url }}" class="card-img-top" alt="{{ package.name }}" style="height: 200px; object-fit: cover;">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ package.name }}</h5>
+                            <p class="card-text">{{ package.description|truncatewords:15 }}</p>
+                            <p class="card-text">
+                                <small class="text-muted">
+                                    <i class="fas fa-clock"></i> {{ package.duration_days }} days
+                                </small>
+                            </p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="h5 text-primary">${{ package.price }}</span>
+                                <div class="rating">
+                                    {% for i in "12345" %}
+                                        {% if forloop.counter <= package.average_rating %}
+                                            <i class="fas fa-star text-warning"></i>
+                                        {% else %}
+                                            <i class="far fa-star text-warning"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <a href="{% url 'package_detail' package.id %}" class="btn btn-primary w-100">View Details</a>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-12">
+                    <div class="alert alert-info">
+                        <h4>No packages available</h4>
+                        <p>There are currently no packages available for this destination. Please check back later!</p>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

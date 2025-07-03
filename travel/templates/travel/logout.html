@@ -1,0 +1,20 @@
+{% extends 'travel/base.html' %}
+
+{% block title %}Logged Out - Travel Management System{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h3>You have been logged out</h3>
+                    <p>Thank you for using our Travel Management System!</p>
+                    <a href="{% url 'login' %}" class="btn btn-primary">Login Again</a>
+                    <a href="{% url 'home' %}" class="btn btn-secondary">Go to Home</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -22,8 +22,8 @@
                             <select class="form-select" id="destination" name="destination">
                                 <option value="">All Destinations</option>
                                 {% for dest in destinations %}
-                                <option value="{{ dest.id }}" {% if dest.id|stringformat:"s"==selected_destination
-                                    %}selected{% endif %}>
+                                <option value="{{ dest.id }}" {% if dest.id|stringformat:"s"==selected_destination %}
+                                    selected{% endif %}>
                                     {{ dest.name }}
                                 </option>
                                 {% endfor %}
@@ -47,15 +47,16 @@
                             <div class="col-6">
                                 <label for="min_price" class="form-label">Min Price</label>
                                 <input type="number" class="form-control" id="min_price" name="min_price"
-                                    value="{{ min_price }}">
+                                    value="{{ min_price }}" step="0.01">
                             </div>
                             <div class="col-6">
                                 <label for="max_price" class="form-label">Max Price</label>
                                 <input type="number" class="form-control" id="max_price" name="max_price"
-                                    value="{{ max_price }}">
+                                    value="{{ max_price }}" step="0.01">
                             </div>
                         </div>
                         <button type="submit" class="btn btn-primary w-100 mt-3">Filter</button>
+                        <a href="{% url 'package_list' %}" class="btn btn-secondary w-100 mt-2">Clear Filters</a>
                     </form>
                 </div>
             </div>
@@ -71,8 +72,18 @@
                 {% for package in page_obj %}
                 <div class="col-md-6 col-lg-4 mb-4">
                     <div class="card h-100">
+                        {% if package.image %}
                         <img src="{{ package.image.url }}" class="card-img-top" alt="{{ package.name }}"
                             style="height: 200px; object-fit: cover;">
+                        {% else %}
+                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center"
+                            style="height: 200px;">
+                            <div class="text-center">
+                                <i class="fas fa-image fa-3x text-muted"></i>
+                                <p class="text-muted mt-2">No Image</p>
+                            </div>
+                        </div>
+                        {% endif %}
                         <div class="card-body">
                             <h5 class="card-title">{{ package.name }}</h5>
                             <p class="card-text">{{ package.description|truncatewords:15 }}</p>
@@ -90,9 +101,10 @@
                                 <span class="h5 text-primary">${{ package.price }}</span>
                                 <div class="rating">
                                     {% for i in "12345" %}
-                                    {% if forloop.counter <= package.average_rating %} <i class="fas fa-star"></i>
+                                    {% if forloop.counter <= package.average_rating %} <i
+                                        class="fas fa-star text-warning"></i>
                                         {% else %}
-                                        <i class="far fa-star"></i>
+                                        <i class="far fa-star text-warning"></i>
                                         {% endif %}
                                         {% endfor %}
                                 </div>
@@ -108,7 +120,8 @@
                 <div class="col-12">
                     <div class="alert alert-info">
                         <h4>No packages found</h4>
-                        <p>Try adjusting your filters or search terms.</p>
+                        <p>No packages match your search criteria. <a href="{% url 'package_list' %}">Clear filters</a>
+                            to see all packages.</p>
                     </div>
                 </div>
                 {% endfor %}

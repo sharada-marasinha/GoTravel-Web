@@ -1,0 +1,51 @@
+{% extends 'travel/base.html' %}
+
+{% block title %}Add Review - {{ package.name }}{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4>
+                        {% if existing_review %}
+                        Update Your Review
+                        {% else %}
+                        Add Your Review
+                        {% endif %}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h5>{{ package.name }}</h5>
+                        <p class="text-muted">{{ package.destination.name }}</p>
+                    </div>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="{{ form.rating.id_for_label }}" class="form-label">Rating</label>
+                            {{ form.rating }}
+                        </div>
+                        <div class="mb-3">
+                            <label for="{{ form.comment.id_for_label }}" class="form-label">Your Review</label>
+                            {{ form.comment }}
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                {% if existing_review %}
+                                Update Review
+                                {% else %}
+                                Submit Review
+                                {% endif %}
+                            </button>
+                            <a href="{% url 'package_detail' package.id %}" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

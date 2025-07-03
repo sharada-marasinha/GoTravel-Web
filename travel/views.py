@@ -14,7 +14,7 @@ from .forms import BookingForm, ReviewForm, UserProfileForm, CustomUserCreationF
 import json
 
 def home(request):
-    """Home page with featured packages, popular destinations, and featured hotels"""
+    """Home page with featured packages, popular destinations, featured hotels, and popular transports"""
     try:
         # Get only featured packages - no fallback
         featured_packages = Package.objects.filter(is_active=True, is_featured=True)[:6]
@@ -24,10 +24,14 @@ def home(request):
         
         # Get only featured hotels - no fallback
         featured_hotels = Hotel.objects.filter(is_active=True, is_featured=True)[:6]
+        
+        # Get only popular transports - no fallback
+        popular_transports = Transport.objects.filter(is_active=True, is_popular=True)[:6]
     except:
         featured_packages = []
         destinations = []
         featured_hotels = []
+        popular_transports = []
     
     # Ensure user profile exists
     if request.user.is_authenticated:
@@ -41,6 +45,7 @@ def home(request):
         'featured_packages': featured_packages,
         'destinations': destinations,
         'featured_hotels': featured_hotels,
+        'popular_transports': popular_transports,
     }
     return HttpResponse(template.render(context, request))
 
@@ -492,6 +497,82 @@ def hotel_detail(request, hotel_id):
     template = loader.get_template('travel/hotel_detail.html')
     context = {
         'hotel': hotel,
+        'packages': packages,
+    }
+    return HttpResponse(template.render(context, request))
+
+def transports(request):
+    """List all transports with search and filter functionality"""
+    try:
+        transports = Transport.objects.filter(is_active=True)
+        destinations = Destination.objects.filter(is_active=True)
+    except:
+        transports = []
+        destinations = []
+    
+    # Search functionality
+    search_query = request.GET.get('search', '')
+    if search_query:
+        transports = transports.filter(
+            Q(name__icontains=search_query) |
+            Q(from_destination__name__icontains=search_query) |
+            Q(to_destination__name__icontains=search_query)
+        )
+    
+    # Filter by transport type
+    transport_type = request.GET.get('transport_type', '')
+    if transport_type:
+        transports = transports.filter(transport_type=transport_type)
+    
+    # Filter by from destination
+    from_destination_id = request.GET.get('from_destination', '')
+    if from_destination_id:
+        try:
+            transports = transports.filter(from_destination_id=int(from_destination_id))
+        except (ValueError, TypeError):
+            pass
+    
+    # Filter by to destination
+    to_destination_id = request.GET.get('to_destination', '')
+    if to_destination_id:
+        try:
+            transports = transports.filter(to_destination_id=int(to_destination_id))
+        except (ValueError, TypeError):
+            pass
+    
+    # Pagination
+    paginator = Paginator(transports, 12)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    template = loader.get_template('travel/transports.html')
+    context = {
+        'page_obj': page_obj,
+        'destinations': destinations,
+        'search_query': search_query,
+        'selected_transport_type': transport_type,
+        'selected_from_destination': from_destination_id,
+        'selected_to_destination': to_destination_id,
+    }
+    return HttpResponse(template.render(context, request))
+
+def transport_detail(request, transport_id):
+    """Transport detail page with packages"""
+    try:
+        transport = get_object_or_404(Transport, id=transport_id, is_active=True)
+        # Get packages that include this transport or are in the same destination
+        packages = Package.objects.filter(
+            Q(destination=transport.from_destination) | Q(destination=transport.to_destination),
+            is_active=True,
+            package_type__in=['transport', 'combo']
+        )
+    except:
+        transport = None
+        packages = []
+    
+    template = loader.get_template('travel/transport_detail.html')
+    context = {
+        'transport': transport,
         'packages': packages,
     }
     return HttpResponse(template.render(context, request))

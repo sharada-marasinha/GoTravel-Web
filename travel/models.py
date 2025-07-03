@@ -106,6 +106,10 @@ class Transport(models.Model):
     departure_time = models.TimeField()
     arrival_time = models.TimeField()
     is_active = models.BooleanField(default=True)
+    is_popular = models.BooleanField(default=False, help_text="Mark as popular transport")
+    description = models.TextField(blank=True)
+    image = models.ImageField(upload_to='transports/', blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
         return f"{self.name} - {self.from_destination} to {self.to_destination}"

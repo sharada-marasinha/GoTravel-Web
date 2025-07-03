@@ -1,0 +1,122 @@
+{% extends 'travel/base.html' %}
+
+{% block title %}Transports - Travel Management System{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Filter Transports</h5>
+                </div>
+                <div class="card-body">
+                    <form method="get">
+                        <div class="mb-3">
+                            <label for="search" class="form-label">Search</label>
+                            <input type="text" class="form-control" id="search" name="search" value="{{ search_query }}" placeholder="Search transports...">
+                        </div>
+                        <div class="mb-3">
+                            <label for="transport_type" class="form-label">Transport Type</label>
+                            <select class="form-select" id="transport_type" name="transport_type">
+                                <option value="">All Types</option>
+                                <option value="flight">Flight</option>
+                                <option value="bus">Bus</option>
+                                <option value="train">Train</option>
+                                <option value="car">Car Rental</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="from_destination" class="form-label">From</label>
+                            <select class="form-select" id="from_destination" name="from_destination">
+                                <option value="">Any Departure</option>
+                                {% for dest in destinations %}
+                                    <option value="{{ dest.id }}">{{ dest.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="to_destination" class="form-label">To</label>
+                            <select class="form-select" id="to_destination" name="to_destination">
+                                <option value="">Any Destination</option>
+                                {% for dest in destinations %}
+                                    <option value="{{ dest.id }}">{{ dest.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 mt-3">Filter</button>
+                        <a href="{% url 'transports' %}" class="btn btn-secondary w-100 mt-2">Clear Filters</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-9">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>Transport Options</h2>
+                <p class="text-muted">Available transports</p>
+            </div>
+            
+            <div class="row">
+                {% for transport in page_obj %}
+                    <div class="col-md-6 mb-4">
+                        <div class="card h-100">
+                            {% if transport.is_popular %}
+                                <div class="position-relative">
+                                    <span class="badge bg-success position-absolute top-0 start-0 m-2">
+                                        <i class="fas fa-fire"></i> Popular
+                                    </span>
+                                </div>
+                            {% endif %}
+                            <div class="card-body">
+                                <div class="d-flex align-items-center mb-3">
+                                    {% if transport.transport_type == 'flight' %}
+                                        <i class="fas fa-plane fa-2x text-primary me-3"></i>
+                                    {% elif transport.transport_type == 'bus' %}
+                                        <i class="fas fa-bus fa-2x text-primary me-3"></i>
+                                    {% elif transport.transport_type == 'train' %}
+                                        <i class="fas fa-train fa-2x text-primary me-3"></i>
+                                    {% else %}
+                                        <i class="fas fa-car fa-2x text-primary me-3"></i>
+                                    {% endif %}
+                                    <div>
+                                        <h5 class="card-title mb-0">{{ transport.name }}</h5>
+                                        <span class="badge bg-secondary">{{ transport.get_transport_type_display }}</span>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <strong>{{ transport.from_destination.name }}</strong> 
+                                    <i class="fas fa-arrow-right text-muted mx-2"></i> 
+                                    <strong>{{ transport.to_destination.name }}</strong>
+                                </div>
+                                <div class="mb-3">
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock"></i> Departure: {{ transport.departure_time }} | 
+                                        Arrival: {{ transport.arrival_time }}
+                                    </small>
+                                </div>
+                                {% if transport.description %}
+                                    <p class="card-text">{{ transport.description|truncatewords:15 }}</p>
+                                {% endif %}
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="h5 text-primary">${{ transport.price }}</span>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <a href="{% url 'transport_detail' transport.id %}" class="btn btn-primary w-100">View Details</a>
+                            </div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="col-12">
+                        <div class="alert alert-info">
+                            <h4>No transports found</h4>
+                            <p>No transports match your search criteria. <a href="{% url 'transports' %}">Clear filters</a> to see all transports.</p>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

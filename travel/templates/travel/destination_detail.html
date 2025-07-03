@@ -118,5 +118,45 @@
             {% endfor %}
         </div>
     </div>
+
+    <div class="mt-5">
+        <h3>Transport Options from {{ destination.name }}</h3>
+        <div class="row">
+            {% for transport in destination.transport_from.all %}
+                {% if transport.is_active %}
+                    <div class="col-md-6 mb-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center mb-2">
+                                    {% if transport.transport_type == 'flight' %}
+                                        <i class="fas fa-plane text-primary me-2"></i>
+                                    {% elif transport.transport_type == 'bus' %}
+                                        <i class="fas fa-bus text-primary me-2"></i>
+                                    {% elif transport.transport_type == 'train' %}
+                                        <i class="fas fa-train text-primary me-2"></i>
+                                    {% else %}
+                                        <i class="fas fa-car text-primary me-2"></i>
+                                    {% endif %}
+                                    <h6 class="card-title mb-0">{{ transport.name }}</h6>
+                                </div>
+                                <p class="card-text small">
+                                    To: <strong>{{ transport.to_destination.name }}</strong><br>
+                                    Time: {{ transport.departure_time }} - {{ transport.arrival_time }}<br>
+                                    Price: <span class="text-primary">${{ transport.price }}</span>
+                                </p>
+                                <a href="{% url 'transport_detail' transport.id %}" class="btn btn-sm btn-outline-primary">View Details</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            {% empty %}
+                <div class="col-12">
+                    <div class="alert alert-info">
+                        <p>No transport options available from this destination.</p>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
 </div>
 {% endblock %}

@@ -1,0 +1,159 @@
+{% extends 'travel/base.html' %}
+
+{% block title %}{{ transport.name }} - Travel Management System{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                {% if transport.image %}
+                    <img src="{{ transport.image.url }}" class="card-img-top" alt="{{ transport.name }}" style="height: 300px; object-fit: cover;">
+                {% else %}
+                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 300px;">
+                        {% if transport.transport_type == 'flight' %}
+                            <i class="fas fa-plane fa-4x text-muted"></i>
+                        {% elif transport.transport_type == 'bus' %}
+                            <i class="fas fa-bus fa-4x text-muted"></i>
+                        {% elif transport.transport_type == 'train' %}
+                            <i class="fas fa-train fa-4x text-muted"></i>
+                        {% else %}
+                            <i class="fas fa-car fa-4x text-muted"></i>
+                        {% endif %}
+                    </div>
+                {% endif %}
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <h1 class="card-title">{{ transport.name }}</h1>
+                        {% if transport.is_popular %}
+                            <span class="badge bg-success">
+                                <i class="fas fa-fire"></i> Popular
+                            </span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <span class="badge bg-primary fs-6">{{ transport.get_transport_type_display }}</span>
+                    </div>
+                    
+                    {% if transport.description %}
+                        <p class="lead">{{ transport.description }}</p>
+                    {% endif %}
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5><i class="fas fa-map-marker-alt text-primary"></i> Route</h5>
+                            <div class="d-flex align-items-center">
+                                <div class="text-center">
+                                    <strong>{{ transport.from_destination.name }}</strong>
+                                    <br><small class="text-muted">{{ transport.from_destination.city }}</small>
+                                </div>
+                                <div class="mx-3">
+                                    <i class="fas fa-arrow-right fa-2x text-primary"></i>
+                                </div>
+                                <div class="text-center">
+                                    <strong>{{ transport.to_destination.name }}</strong>
+                                    <br><small class="text-muted">{{ transport.to_destination.city }}</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h5><i class="fas fa-clock text-primary"></i> Schedule</h5>
+                            <p><strong>Departure:</strong> {{ transport.departure_time }}</p>
+                            <p><strong>Arrival:</strong> {{ transport.arrival_time }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Related Packages Section -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5>Transport Packages Available</h5>
+                </div>
+                <div class="card-body">
+                    {% if packages %}
+                        <div class="row">
+                            {% for package in packages %}
+                                <div class="col-md-6 mb-3">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h6 class="card-title">{{ package.name }}</h6>
+                                            <p class="card-text">{{ package.description|truncatewords:15 }}</p>
+                                            <p class="text-primary">${{ package.price }} - {{ package.duration_days }} days</p>
+                                            <a href="{% url 'package_detail' package.id %}" class="btn btn-sm btn-primary">View Package</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No packages available for this transport route at the moment.</p>
+                        <a href="{% url 'package_list' %}" class="btn btn-primary">Browse All Packages</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card sticky-top" style="top: 20px;">
+                <div class="card-header">
+                    <h5>Book This Transport</h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        <h2 class="text-primary">${{ transport.price }}</h2>
+                        <p class="text-muted">per person</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h6>Transport Details:</h6>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-check text-success"></i> {{ transport.get_transport_type_display }}</li>
+                            <li><i class="fas fa-check text-success"></i> {{ transport.departure_time }} departure</li>
+                            <li><i class="fas fa-check text-success"></i> Direct route</li>
+                        </ul>
+                    </div>
+                    
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'package_list' %}?from_destination={{ transport.from_destination.id }}&to_destination={{ transport.to_destination.id }}&type=transport" class="btn btn-primary btn-lg w-100 mb-2">
+                            View Transport Packages
+                        </a>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <p>Please <a href="{% url 'login' %}">login</a> to view packages.</p>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="mt-3">
+                        <small class="text-muted">
+                            <i class="fas fa-shield-alt"></i> Secure booking<br>
+                            <i class="fas fa-phone"></i> 24/7 support<br>
+                            <i class="fas fa-undo"></i> Flexible cancellation
+                        </small>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quick Info Card -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h6>Quick Information</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <i class="fas fa-clock fa-2x text-primary mb-2"></i>
+                            <p class="small">Duration<br><strong>{{ transport.departure_time }} - {{ transport.arrival_time }}</strong></p>
+                        </div>
+                        <div class="col-6">
+                            <i class="fas fa-route fa-2x text-primary mb-2"></i>
+                            <p class="small">Route<br><strong>Direct</strong></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

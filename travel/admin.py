@@ -154,9 +154,45 @@ class HotelAdmin(admin.ModelAdmin):
 
 @admin.register(Transport)
 class TransportAdmin(admin.ModelAdmin):
-    list_display = ('name', 'transport_type', 'from_destination', 'to_destination', 'price', 'is_active')
-    list_filter = ('transport_type', 'is_active')
+    list_display = ('name', 'transport_type', 'from_destination', 'to_destination', 'price', 'is_active', 'is_popular', 'created_at')
+    list_filter = ('transport_type', 'is_active', 'is_popular', 'created_at')
     search_fields = ('name', 'from_destination__name', 'to_destination__name')
+    actions = ['mark_as_popular', 'unmark_as_popular', 'activate_transports', 'deactivate_transports']
+    
+    fieldsets = (
+        ('Basic Information', {
+            'fields': ('name', 'transport_type', 'description')
+        }),
+        ('Route Details', {
+            'fields': ('from_destination', 'to_destination', 'departure_time', 'arrival_time')
+        }),
+        ('Pricing & Media', {
+            'fields': ('price', 'image')
+        }),
+        ('Status', {
+            'fields': ('is_active', 'is_popular')
+        }),
+    )
+    
+    def mark_as_popular(self, request, queryset):
+        updated = queryset.update(is_popular=True)
+        self.message_user(request, f'{updated} transports marked as popular.')
+    mark_as_popular.short_description = "Mark selected transports as popular"
+    
+    def unmark_as_popular(self, request, queryset):
+        updated = queryset.update(is_popular=False)
+        self.message_user(request, f'{updated} transports unmarked as popular.')
+    unmark_as_popular.short_description = "Unmark selected transports as popular"
+    
+    def activate_transports(self, request, queryset):
+        updated = queryset.update(is_active=True)
+        self.message_user(request, f'{updated} transports activated.')
+    activate_transports.short_description = "Activate selected transports"
+    
+    def deactivate_transports(self, request, queryset):
+        updated = queryset.update(is_active=False)
+        self.message_user(request, f'{updated} transports deactivated.')
+    deactivate_transports.short_description = "Deactivate selected transports"
 
 @admin.register(Booking)
 class BookingAdmin(admin.ModelAdmin):

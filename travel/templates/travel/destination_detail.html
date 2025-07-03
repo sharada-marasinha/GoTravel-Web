@@ -38,6 +38,43 @@
     </div>
 
     <div class="mt-5">
+        <h3>Available Hotels in {{ destination.name }}</h3>
+        <div class="row">
+            {% for hotel in destination.hotel_set.all %}
+                {% if hotel.is_active %}
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100">
+                            {% if hotel.image %}
+                                <img src="{{ hotel.image.url }}" class="card-img-top" alt="{{ hotel.name }}" style="height: 150px; object-fit: cover;">
+                            {% else %}
+                                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 150px;">
+                                    <i class="fas fa-hotel fa-2x text-muted"></i>
+                                </div>
+                            {% endif %}
+                            <div class="card-body">
+                                <h6 class="card-title">{{ hotel.name }}</h6>
+                                <div class="mb-2">
+                                    <span class="text-warning small">{{ hotel.get_star_display }}</span>
+                                </div>
+                                <p class="card-text small">${{ hotel.price_per_night }}/night</p>
+                            </div>
+                            <div class="card-footer">
+                                <a href="{% url 'hotel_detail' hotel.id %}" class="btn btn-sm btn-outline-primary w-100">View Hotel</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            {% empty %}
+                <div class="col-12">
+                    <div class="alert alert-info">
+                        <p>No hotels available in this destination.</p>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <div class="mt-5">
         <h3>Available Packages for {{ destination.name }}</h3>
         <div class="row">
             {% for package in packages %}

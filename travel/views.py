@@ -14,28 +14,20 @@ from .forms import BookingForm, ReviewForm, UserProfileForm, CustomUserCreationF
 import json
 
 def home(request):
-    """Home page with featured packages"""
+    """Home page with featured packages, popular destinations, and featured hotels"""
     try:
-        # Get featured packages first, then fallback to regular active packages
+        # Get only featured packages - no fallback
         featured_packages = Package.objects.filter(is_active=True, is_featured=True)[:6]
-        if featured_packages.count() < 6:
-            # If not enough featured packages, fill with other active packages
-            additional_packages = Package.objects.filter(is_active=True).exclude(
-                id__in=featured_packages.values_list('id', flat=True)
-            )[:6-featured_packages.count()]
-            featured_packages = list(featured_packages) + list(additional_packages)
         
-        # Get popular destinations first, then fallback to regular active destinations
+        # Get only popular destinations - no fallback
         destinations = Destination.objects.filter(is_active=True, is_popular=True)[:8]
-        if destinations.count() < 8:
-            # If not enough popular destinations, fill with other active destinations
-            additional_destinations = Destination.objects.filter(is_active=True).exclude(
-                id__in=destinations.values_list('id', flat=True)
-            )[:8-destinations.count()]
-            destinations = list(destinations) + list(additional_destinations)
+        
+        # Get only featured hotels - no fallback
+        featured_hotels = Hotel.objects.filter(is_active=True, is_featured=True)[:6]
     except:
         featured_packages = []
         destinations = []
+        featured_hotels = []
     
     # Ensure user profile exists
     if request.user.is_authenticated:
@@ -48,6 +40,7 @@ def home(request):
     context = {
         'featured_packages': featured_packages,
         'destinations': destinations,
+        'featured_hotels': featured_hotels,
     }
     return HttpResponse(template.render(context, request))
 
@@ -417,3 +410,88 @@ def logout_view(request):
     logout(request)
     messages.success(request, 'You have been logged out successfully.')
     return redirect('home')
+
+def hotels(request):
+    """List all hotels with search and filter functionality"""
+    try:
+        hotels = Hotel.objects.filter(is_active=True)
+        destinations = Destination.objects.filter(is_active=True)
+    except:
+        hotels = []
+        destinations = []
+    
+    # Search functionality
+    search_query = request.GET.get('search', '')
+    if search_query:
+        hotels = hotels.filter(
+            Q(name__icontains=search_query) |
+            Q(destination__name__icontains=search_query)
+        )
+    
+    # Filter by destination
+    destination_id = request.GET.get('destination', '')
+    if destination_id:
+        try:
+            hotels = hotels.filter(destination_id=int(destination_id))
+        except (ValueError, TypeError):
+            pass
+    
+    # Filter by star rating
+    star_rating = request.GET.get('star_rating', '')
+    if star_rating:
+        try:
+            hotels = hotels.filter(star_rating=int(star_rating))
+        except (ValueError, TypeError):
+            pass
+    
+    # Filter by price range
+    min_price = request.GET.get('min_price', '')
+    max_price = request.GET.get('max_price', '')
+    if min_price:
+        try:
+            hotels = hotels.filter(price_per_night__gte=float(min_price))
+        except (ValueError, TypeError):
+            pass
+    if max_price:
+        try:
+            hotels = hotels.filter(price_per_night__lte=float(max_price))
+        except (ValueError, TypeError):
+            pass
+    
+    # Pagination
+    paginator = Paginator(hotels, 12)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    template = loader.get_template('travel/hotels.html')
+    context = {
+        'page_obj': page_obj,
+        'destinations': destinations,
+        'search_query': search_query,
+        'selected_destination': destination_id,
+        'selected_star_rating': star_rating,
+        'min_price': min_price,
+        'max_price': max_price,
+    }
+    return HttpResponse(template.render(context, request))
+
+def hotel_detail(request, hotel_id):
+    """Hotel detail page with packages"""
+    try:
+        hotel = get_object_or_404(Hotel, id=hotel_id, is_active=True)
+        # Get packages that include this hotel or are in the same destination
+        packages = Package.objects.filter(
+            destination=hotel.destination, 
+            is_active=True,
+            package_type__in=['hotel', 'combo']
+        )
+    except:
+        hotel = None
+        packages = []
+    
+    template = loader.get_template('travel/hotel_detail.html')
+    context = {
+        'hotel': hotel,
+        'packages': packages,
+    }
+    return HttpResponse(template.render(context, request))

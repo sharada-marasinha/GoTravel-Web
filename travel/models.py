@@ -80,9 +80,15 @@ class Hotel(models.Model):
     price_per_night = models.DecimalField(max_digits=8, decimal_places=2)
     image = models.ImageField(upload_to='hotels/')
     is_active = models.BooleanField(default=True)
+    is_featured = models.BooleanField(default=False, help_text="Mark as featured hotel")
+    description = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
         return self.name
+    
+    def get_star_display(self):
+        return '★' * self.star_rating + '☆' * (5 - self.star_rating)
 
 class Transport(models.Model):
     TRANSPORT_TYPES = [

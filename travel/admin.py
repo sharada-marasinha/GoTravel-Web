@@ -110,9 +110,47 @@ class PackageAdmin(admin.ModelAdmin):
 
 @admin.register(Hotel)
 class HotelAdmin(admin.ModelAdmin):
-    list_display = ('name', 'destination', 'star_rating', 'price_per_night', 'is_active')
-    list_filter = ('star_rating', 'is_active', 'destination')
-    search_fields = ('name', 'destination__name')
+    list_display = ('name', 'destination', 'star_rating_display', 'price_per_night', 'is_active', 'is_featured', 'created_at')
+    list_filter = ('star_rating', 'is_active', 'is_featured', 'destination', 'created_at')
+    search_fields = ('name', 'destination__name', 'address')
+    actions = ['mark_as_featured', 'unmark_as_featured', 'activate_hotels', 'deactivate_hotels']
+    
+    fieldsets = (
+        ('Basic Information', {
+            'fields': ('name', 'destination', 'address', 'description')
+        }),
+        ('Hotel Details', {
+            'fields': ('star_rating', 'amenities', 'price_per_night', 'image')
+        }),
+        ('Status', {
+            'fields': ('is_active', 'is_featured')
+        }),
+    )
+    
+    def star_rating_display(self, obj):
+        stars = '★' * obj.star_rating + '☆' * (5 - obj.star_rating)
+        return format_html(f'<span style="color: gold;">{stars}</span>')
+    star_rating_display.short_description = 'Stars'
+    
+    def mark_as_featured(self, request, queryset):
+        updated = queryset.update(is_featured=True)
+        self.message_user(request, f'{updated} hotels marked as featured.')
+    mark_as_featured.short_description = "Mark selected hotels as featured"
+    
+    def unmark_as_featured(self, request, queryset):
+        updated = queryset.update(is_featured=False)
+        self.message_user(request, f'{updated} hotels unmarked as featured.')
+    unmark_as_featured.short_description = "Unmark selected hotels as featured"
+    
+    def activate_hotels(self, request, queryset):
+        updated = queryset.update(is_active=True)
+        self.message_user(request, f'{updated} hotels activated.')
+    activate_hotels.short_description = "Activate selected hotels"
+    
+    def deactivate_hotels(self, request, queryset):
+        updated = queryset.update(is_active=False)
+        self.message_user(request, f'{updated} hotels deactivated.')
+    deactivate_hotels.short_description = "Deactivate selected hotels"
 
 @admin.register(Transport)
 class TransportAdmin(admin.ModelAdmin):

@@ -16,27 +16,28 @@
                             <strong>Booking ID:</strong> #{{ booking.id }}
                         </div>
                         <div class="col-md-6">
-                            <strong>Status:</strong> 
-                            <span class="badge {% if booking.status == 'confirmed' %}bg-success{% elif booking.status == 'pending' %}bg-warning{% else %}bg-danger{% endif %}">
+                            <strong>Status:</strong>
+                            <span
+                                class="badge {% if booking.status == 'confirmed' %}bg-success{% elif booking.status == 'pending' %}bg-warning{% else %}bg-danger{% endif %}">
                                 {{ booking.get_status_display }}
                             </span>
                         </div>
                     </div>
-                    
+
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <strong>Travel Date:</strong> {{ booking.travel_date|date:"M d, Y" }}
                         </div>
                         <div class="col-md-6">
-                            <strong>Return Date:</strong> 
+                            <strong>Return Date:</strong>
                             {% if booking.return_date %}
-                                {{ booking.return_date|date:"M d, Y" }}
+                            {{ booking.return_date|date:"M d, Y" }}
                             {% else %}
-                                Not specified
+                            Not specified
                             {% endif %}
                         </div>
                     </div>
-                    
+
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <strong>Number of People:</strong> {{ booking.num_people }}
@@ -45,11 +46,12 @@
                             <strong>Total Amount:</strong> ${{ booking.total_amount }}
                         </div>
                     </div>
-                    
+
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <strong>Payment Status:</strong> 
-                            <span class="badge {% if booking.payment_status == 'paid' %}bg-success{% elif booking.payment_status == 'pending' %}bg-warning{% else %}bg-danger{% endif %}">
+                            <strong>Payment Status:</strong>
+                            <span
+                                class="badge {% if booking.payment_status == 'paid' %}bg-success{% elif booking.payment_status == 'pending' %}bg-warning{% else %}bg-danger{% endif %}">
                                 {{ booking.get_payment_status_display }}
                             </span>
                         </div>
@@ -57,25 +59,25 @@
                             <strong>Booking Date:</strong> {{ booking.created_at|date:"M d, Y" }}
                         </div>
                     </div>
-                    
+
                     {% if booking.special_requests %}
-                        <div class="mb-3">
-                            <strong>Special Requests:</strong>
-                            <p>{{ booking.special_requests }}</p>
-                        </div>
+                    <div class="mb-3">
+                        <strong>Special Requests:</strong>
+                        <p>{{ booking.special_requests }}</p>
+                    </div>
                     {% endif %}
-                    
+
                     {% if booking.payment_status == 'pending' %}
-                        <div class="mt-4">
-                            <button class="btn btn-success" onclick="processPayment('{{ booking.id }}')">
-                                Process Payment
-                            </button>
-                        </div>
+                    <div class="mt-4">
+                        <button class="btn btn-success" onclick="processPayment('{{ booking.id }}')">
+                            Process Payment
+                        </button>
+                    </div>
                     {% endif %}
                 </div>
             </div>
         </div>
-        
+
         <div class="col-md-4">
             <div class="card">
                 <div class="card-header">
@@ -83,13 +85,13 @@
                 </div>
                 <div class="card-body">
                     {% if booking.package %}
-                        <img src="{{ booking.package.image.url }}" class="img-fluid mb-3" alt="{{ booking.package.name }}">
-                        <h5>{{ booking.package.name }}</h5>
-                        <p class="text-muted">{{ booking.package.destination.name }}</p>
-                        <p><strong>Duration:</strong> {{ booking.package.duration_days }} days</p>
-                        <a href="{% url 'package_detail' booking.package.id %}" class="btn btn-outline-primary">
-                            View Package Details
-                        </a>
+                    <img src="{{ booking.package.image.url }}" class="img-fluid mb-3" alt="{{ booking.package.name }}">
+                    <h5>{{ booking.package.name }}</h5>
+                    <p class="text-muted">{{ booking.package.destination.name }}</p>
+                    <p><strong>Duration:</strong> {{ booking.package.duration_days }} days</p>
+                    <a href="{% url 'package_detail' booking.package.id %}" class="btn btn-outline-primary">
+                        View Package Details
+                    </a>
                     {% endif %}
                 </div>
             </div>
@@ -98,31 +100,31 @@
 </div>
 
 <script>
-function processPayment(bookingId) {
-    if (confirm('Are you sure you want to process the payment?')) {
-        fetch('/process-payment/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                'booking_id': bookingId
+    function processPayment(bookingId) {
+        if (confirm('Are you sure you want to process the payment?')) {
+            fetch('/process-payment/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    'booking_id': bookingId
+                })
             })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                alert('Payment processed successfully!');
-                location.reload();
-            } else {
-                alert('Payment failed. Please try again.');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('An error occurred. Please try again.');
-        });
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        alert('Payment processed successfully!');
+                        location.reload();
+                    } else {
+                        alert('Payment failed. Please try again.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred. Please try again.');
+                });
+        }
     }
-}
 </script>
 {% endblock %}

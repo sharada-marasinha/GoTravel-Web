@@ -22,7 +22,8 @@
                             <select class="form-select" id="destination" name="destination">
                                 <option value="">All Destinations</option>
                                 {% for dest in destinations %}
-                                <option value="{{ dest.id }}" {% if dest.id|stringformat:"s" == selected_destination %}selected{% endif %}>
+                                <option value="{{ dest.id }}" {% if dest.id|stringformat:"s"==selected_destination
+                                    %}selected{% endif %}>
                                     {{ dest.name }}
                                 </option>
                                 {% endfor %}
@@ -32,13 +33,13 @@
                             <label for="type" class="form-label">Package Type</label>
                             <select class="form-select" id="type" name="type">
                                 <option value="">All Types</option>
-                                <option value="tour" {% if selected_type == 'tour' %}selected{% endif %}>Tour Package
+                                <option value="tour" {% if selected_type=='tour' %}selected{% endif %}>Tour Package
                                 </option>
-                                <option value="hotel" {% if selected_type == 'hotel' %}selected{% endif %}>Hotel Package
+                                <option value="hotel" {% if selected_type=='hotel' %}selected{% endif %}>Hotel Package
                                 </option>
-                                <option value="transport" {% if selected_type == 'transport' %}selected{% endif %}>
+                                <option value="transport" {% if selected_type=='transport' %}selected{% endif %}>
                                     Transport Package</option>
-                                <option value="combo" {% if selected_type == 'combo' %}selected{% endif %}>Combo Package
+                                <option value="combo" {% if selected_type=='combo' %}selected{% endif %}>Combo Package
                                 </option>
                             </select>
                         </div>
@@ -131,7 +132,8 @@
                     {% else %}
                     <li class="page-item">
                         <a class="page-link"
-                            href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_destination %}&destination={{ selected_destination }}{% endif %}{% if selected_type %}&type={{ selected_type }}{% endif %}{% if min_price %}&min_price={{ min_price }}{% endif %}{% if max_price %}&max_price={{ max_price }}{% endif %}">{{ num }}</a>
+                            href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_destination %}&destination={{ selected_destination }}{% endif %}{% if selected_type %}&type={{ selected_type }}{% endif %}{% if min_price %}&min_price={{ min_price }}{% endif %}{% if max_price %}&max_price={{ max_price }}{% endif %}">{{
+                            num }}</a>
                     </li>
                     {% endif %}
                     {% endfor %}

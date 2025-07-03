@@ -5,34 +5,35 @@
 {% block content %}
 <div class="container my-5">
     <h1 class="text-center mb-5">Explore Amazing Destinations</h1>
-    
+
     <div class="row">
         {% for destination in destinations %}
-            <div class="col-md-4 col-sm-6 mb-4">
-                <div class="card h-100">
-                    <img src="{{ destination.image.url }}" class="card-img-top" alt="{{ destination.name }}" style="height: 250px; object-fit: cover;">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ destination.name }}</h5>
-                        <p class="card-text">
-                            <i class="fas fa-map-marker-alt text-primary"></i> 
-                            {{ destination.city }}, {{ destination.country }}
-                        </p>
-                        <p class="card-text">{{ destination.description|truncatewords:20 }}</p>
-                    </div>
-                    <div class="card-footer">
-                        <a href="{% url 'destination_detail' destination.id %}" class="btn btn-primary w-100">
-                            Explore Packages
-                        </a>
-                    </div>
+        <div class="col-md-4 col-sm-6 mb-4">
+            <div class="card h-100">
+                <img src="{{ destination.image.url }}" class="card-img-top" alt="{{ destination.name }}"
+                    style="height: 250px; object-fit: cover;">
+                <div class="card-body">
+                    <h5 class="card-title">{{ destination.name }}</h5>
+                    <p class="card-text">
+                        <i class="fas fa-map-marker-alt text-primary"></i>
+                        {{ destination.city }}, {{ destination.country }}
+                    </p>
+                    <p class="card-text">{{ destination.description|truncatewords:20 }}</p>
+                </div>
+                <div class="card-footer">
+                    <a href="{% url 'destination_detail' destination.id %}" class="btn btn-primary w-100">
+                        Explore Packages
+                    </a>
                 </div>
             </div>
+        </div>
         {% empty %}
-            <div class="col-12">
-                <div class="alert alert-info text-center">
-                    <h4>No destinations available</h4>
-                    <p>Please check back later for exciting destinations!</p>
-                </div>
+        <div class="col-12">
+            <div class="alert alert-info text-center">
+                <h4>No destinations available</h4>
+                <p>Please check back later for exciting destinations!</p>
             </div>
+        </div>
         {% endfor %}
     </div>
 </div>

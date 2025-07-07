@@ -27,11 +27,15 @@ def home(request):
         
         # Get only popular transports - no fallback
         popular_transports = Transport.objects.filter(is_active=True, is_popular=True)[:6]
+        
+        # Get all destinations for auto-suggestions
+        all_destinations = Destination.objects.filter(is_active=True)
     except:
         featured_packages = []
         destinations = []
         featured_hotels = []
         popular_transports = []
+        all_destinations = []
     
     # Ensure user profile exists
     if request.user.is_authenticated:
@@ -46,6 +50,8 @@ def home(request):
         'destinations': destinations,
         'featured_hotels': featured_hotels,
         'popular_transports': popular_transports,
+        'all_destinations': all_destinations,
+        'today': timezone.now().date(),
     }
     return HttpResponse(template.render(context, request))
 
@@ -606,3 +612,30 @@ def transport_detail(request, transport_id):
         'packages': packages,
     }
     return HttpResponse(template.render(context, request))
+
+def destination_suggestions(request):
+    """API endpoint for destination auto-suggestions"""
+    query = request.GET.get('q', '').strip()
+    suggestions = []
+    
+    if len(query) >= 2:  # Start suggesting after 2 characters
+        try:
+            destinations = Destination.objects.filter(
+                Q(name__icontains=query) |
+                Q(city__icontains=query) |
+                Q(country__icontains=query),
+                is_active=True
+            ).distinct()[:10]  # Limit to 10 suggestions
+            
+            for dest in destinations:
+                suggestions.append({
+                    'id': dest.id,
+                    'name': dest.name,
+                    'city': dest.city,
+                    'country': dest.country,
+                    'display': f"{dest.name}, {dest.city}, {dest.country}"
+                })
+        except:
+            pass
+    
+    return JsonResponse({'suggestions': suggestions})

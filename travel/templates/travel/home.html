@@ -1,12 +1,131 @@
 {% extends 'travel/base.html' %}
 
 {% block content %}
-<div class="hero-section">
-    <div class="container text-center">
-        <h1 class="display-4 mb-4">Discover Your Next Adventure</h1>
-        <p class="lead mb-4">Explore amazing destinations, book unforgettable experiences, and create memories that last
-            a lifetime.</p>
-        <a href="{% url 'package_list' %}" class="btn btn-success btn-lg">Explore Packages</a>
+<div class="hero-section bg-primary">
+    <div class="container text-center py-5">
+        <h1 class="display-4 mb-4 text-white">Discover Your Next Adventure</h1>
+        <p class="lead mb-4 text-white-50">Explore amazing destinations, book unforgettable experiences, and create memories that last a lifetime.</p>
+        
+        <!-- Search Component -->
+<div class="search-container p-4 shadow-sm bg-white rounded mx-auto border" style="max-width: 960px;">
+    <form method="get" action="{% url 'package_list' %}" id="searchForm">
+        <div class="row g-4">
+            <!-- Destination -->
+            <div class="col-md-6 col-lg-3">
+                <label for="destination" class="form-label text-dark fw-bold">Destination</label>
+                <div class="position-relative">
+                    <input type="text" class="form-control" id="destination" name="destination" 
+                           placeholder="Enter destination (e.g., Nuwara Eliya, Ella, Jaffna)" 
+                           autocomplete="off">
+                    <div id="destinationSuggestions" class="position-absolute w-100 bg-white border rounded mt-1 d-none" style="z-index: 1000; max-height: 300px; overflow-y: auto;">
+                        <!-- Auto-suggestions will be populated here -->
+                    </div>
+                    <div class="position-absolute top-50 end-0 translate-middle-y me-2">
+                        <div id="loadingSpinner" class="spinner-border spinner-border-sm text-primary d-none" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Travel Dates -->
+            <div class="col-md-6 col-lg-2">
+                <label for="start_date" class="form-label fw-semibold text-secondary">From Date</label>
+                <input type="date" class="form-control border-success" id="start_date" name="start_date"
+                    min="{{ today|date:'Y-m-d' }}">
+            </div>
+
+            <div class="col-md-6 col-lg-2">
+                <label for="end_date" class="form-label fw-semibold text-secondary">To Date</label>
+                <input type="date" class="form-control border-success" id="end_date" name="end_date"
+                    min="{{ today|date:'Y-m-d' }}">
+            </div>
+
+            <!-- Travelers -->
+            <div class="col-md-6 col-lg-3">
+                <label class="form-label fw-semibold text-secondary">Travelers</label>
+                <div class="dropdown">
+                    <button class="btn btn-outline-success dropdown-toggle w-100" type="button"
+                        id="travelersDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <span id="travelersText">2 Adults</span>
+                    </button>
+                    <div class="dropdown-menu p-3 border rounded-3 shadow-sm" style="min-width: 260px;">
+                        <div class="row mb-2 align-items-center">
+                            <div class="col-6">
+                                <label class="form-label small text-secondary">Adults</label>
+                            </div>
+                            <div class="col-6">
+                                <div class="input-group input-group-sm">
+                                    <button class="btn btn-outline-secondary" type="button"
+                                        onclick="changeTravelers('adults', -1)">-</button>
+                                    <input type="number"
+                                        class="form-control text-center border-secondary bg-light"
+                                        id="adults" name="adults" value="2" min="1" max="20" readonly>
+                                    <button class="btn btn-outline-secondary" type="button"
+                                        onclick="changeTravelers('adults', 1)">+</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row align-items-center">
+                            <div class="col-6">
+                                <label class="form-label small text-secondary">Children</label>
+                            </div>
+                            <div class="col-6">
+                                <div class="input-group input-group-sm">
+                                    <button class="btn btn-outline-secondary" type="button"
+                                        onclick="changeTravelers('children', -1)">-</button>
+                                    <input type="number"
+                                        class="form-control text-center border-secondary bg-light"
+                                        id="children" name="children" value="0" min="0" max="10" readonly>
+                                    <button class="btn btn-outline-secondary" type="button"
+                                        onclick="changeTravelers('children', 1)">+</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search Button -->
+            <div class="col-12 col-lg-2 d-grid align-items-end">
+                <button type="submit" class="btn btn-success w-100 mt-2 mt-lg-0">Search</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+
+                    
+                    <!-- Budget Range -->
+                    {% comment %} <div class="col-12">
+                        <label class="form-label text-dark fw-bold">Budget Range </label>
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <input type="range" class="form-range" id="budgetRange" min="10000" max="1000000" 
+                                       value="100000" step="10000" oninput="updateBudgetDisplay()">
+                                <div class="d-flex justify-content-between">
+                                    <small class="text-dark">10,000</small>
+                                    <small class="text-dark">1,000,000</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-center">
+                                    <span class="badge bg-success fs-6" id="budgetDisplay">LKR 100,000</span>
+                                    <input type="hidden" name="max_price" id="max_price" value="100000">
+                                </div>
+                            </div>
+                        </div>
+                    </div> {% endcomment %}
+                    
+                    <!-- Search Button -->
+                    <div class="col-12 pt-3">
+                        <button type="submit" class="btn btn-success btn-lg px-5">
+                            <i class="fas fa-search me-2"></i>Search Packages
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
@@ -270,4 +389,246 @@
         </div>
     {% endif %}
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Improved auto-suggestions for destinations
+let debounceTimer;
+let selectedDestinationId = null;
+
+document.getElementById('destination').addEventListener('input', function() {
+    const input = this.value.trim();
+    const suggestions = document.getElementById('destinationSuggestions');
+    const spinner = document.getElementById('loadingSpinner');
+    
+    // Clear previous timer
+    clearTimeout(debounceTimer);
+    
+    if (input.length >= 2) {
+        // Show loading spinner
+        spinner.classList.remove('d-none');
+        
+        // Debounce API calls
+        debounceTimer = setTimeout(() => {
+            fetchDestinationSuggestions(input);
+        }, 300);
+    } else {
+        suggestions.classList.add('d-none');
+        spinner.classList.add('d-none');
+        selectedDestinationId = null;
+    }
+});
+
+function fetchDestinationSuggestions(query) {
+    const spinner = document.getElementById('loadingSpinner');
+    const suggestions = document.getElementById('destinationSuggestions');
+    
+    fetch(`/api/destinations/?q=${encodeURIComponent(query)}`)
+        .then(response => response.json())
+        .then(data => {
+            spinner.classList.add('d-none');
+            
+            if (data.suggestions && data.suggestions.length > 0) {
+                const suggestionHTML = data.suggestions.map(dest => `
+                    <div class="suggestion-item p-3 border-bottom cursor-pointer d-flex align-items-center" 
+                         onclick="selectDestination('${dest.id}', '${dest.display}')" 
+                         onmouseover="this.style.backgroundColor='#f8f9fa'" 
+                         onmouseout="this.style.backgroundColor='white'">
+                        <div>
+                            <i class="fas fa-map-marker-alt text-primary me-2"></i>
+                            <strong>${dest.name}</strong>
+                            <br>
+                            <small class="text-muted">${dest.city}, ${dest.country}</small>
+                        </div>
+                    </div>
+                `).join('');
+                
+                suggestions.innerHTML = suggestionHTML;
+                suggestions.classList.remove('d-none');
+            } else {
+                suggestions.innerHTML = `
+                    <div class="p-3 text-center text-muted">
+                        <i class="fas fa-search me-2"></i>
+                        No destinations found for "${query}"
+                    </div>
+                `;
+                suggestions.classList.remove('d-none');
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching suggestions:', error);
+            spinner.classList.add('d-none');
+            suggestions.classList.add('d-none');
+        });
+}
+
+function selectDestination(id, display) {
+    document.getElementById('destination').value = display;
+    document.getElementById('destinationSuggestions').classList.add('d-none');
+    selectedDestinationId = id;
+    
+    // Add hidden input for destination ID
+    const existingInput = document.querySelector('input[name="destination_id"]');
+    if (existingInput) {
+        existingInput.remove();
+    }
+    
+    const hiddenInput = document.createElement('input');
+    hiddenInput.type = 'hidden';
+    hiddenInput.name = 'destination_id';
+    hiddenInput.value = id;
+    document.getElementById('searchForm').appendChild(hiddenInput);
+}
+
+// Handle keyboard navigation
+document.getElementById('destination').addEventListener('keydown', function(e) {
+    const suggestions = document.querySelectorAll('.suggestion-item');
+    let selectedIndex = -1;
+    
+    // Find currently selected item
+    suggestions.forEach((item, index) => {
+        if (item.classList.contains('selected')) {
+            selectedIndex = index;
+        }
+    });
+    
+    if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        selectedIndex = Math.min(selectedIndex + 1, suggestions.length - 1);
+        updateSelection(suggestions, selectedIndex);
+    } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        selectedIndex = Math.max(selectedIndex - 1, -1);
+        updateSelection(suggestions, selectedIndex);
+    } else if (e.key === 'Enter' && selectedIndex >= 0) {
+        e.preventDefault();
+        suggestions[selectedIndex].click();
+    } else if (e.key === 'Escape') {
+        document.getElementById('destinationSuggestions').classList.add('d-none');
+    }
+});
+
+function updateSelection(suggestions, selectedIndex) {
+    suggestions.forEach((item, index) => {
+        if (index === selectedIndex) {
+            item.classList.add('selected');
+            item.style.backgroundColor = '#e3f2fd';
+        } else {
+            item.classList.remove('selected');
+            item.style.backgroundColor = 'white';
+        }
+    });
+}
+
+// Hide suggestions when clicking outside
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('#destination') && !e.target.closest('#destinationSuggestions')) {
+        document.getElementById('destinationSuggestions').classList.add('d-none');
+    }
+});
+
+// Clear destination ID when input is manually changed
+document.getElementById('destination').addEventListener('input', function() {
+    if (selectedDestinationId) {
+        const currentValue = this.value;
+        // If user types something different, clear the selected ID
+        setTimeout(() => {
+            if (this.value !== currentValue) {
+                selectedDestinationId = null;
+                const existingInput = document.querySelector('input[name="destination_id"]');
+                if (existingInput) {
+                    existingInput.remove();
+                }
+            }
+        }, 100);
+    }
+});
+
+// Travelers counter
+function changeTravelers(type, change) {
+    const input = document.getElementById(type);
+    const currentValue = parseInt(input.value);
+    const newValue = Math.max(type === 'adults' ? 1 : 0, currentValue + change);
+    const maxValue = type === 'adults' ? 20 : 10;
+    
+    if (newValue <= maxValue) {
+        input.value = newValue;
+        updateTravelersDisplay();
+    }
+}
+
+function updateTravelersDisplay() {
+    const adults = parseInt(document.getElementById('adults').value);
+    const children = parseInt(document.getElementById('children').value);
+    
+    let text = adults + ' Adult' + (adults > 1 ? 's' : '');
+    if (children > 0) {
+        text += ', ' + children + ' Child' + (children > 1 ? 'ren' : '');
+    }
+    
+    document.getElementById('travelersText').textContent = text;
+}
+
+// Budget slider
+function updateBudgetDisplay() {
+    const budget = document.getElementById('budgetRange').value;
+    const formatted = new Intl.NumberFormat('en-LK').format(budget);
+    document.getElementById('budgetDisplay').textContent = 'LKR ' + formatted;
+    document.getElementById('max_price').value = budget;
+}
+
+// Date validation
+document.getElementById('start_date').addEventListener('change', function() {
+    const startDate = this.value;
+    const endDateInput = document.getElementById('end_date');
+    endDateInput.min = startDate;
+    
+    if (endDateInput.value && endDateInput.value < startDate) {
+        endDateInput.value = startDate;
+    }
+});
+
+// Form submission enhancement
+document.getElementById('searchForm').addEventListener('submit', function(e) {
+    const destination = document.getElementById('destination').value;
+    
+    // Add destination to search query if provided
+    if (destination) {
+        const hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = 'search';
+        hiddenInput.value = destination;
+        this.appendChild(hiddenInput);
+    }
+});
+
+// Initialize displays
+updateTravelersDisplay();
+updateBudgetDisplay();
+</script>
+
+<style>
+/* ...existing code... */
+
+.suggestion-item {
+    transition: background-color 0.2s ease;
+    cursor: pointer;
+}
+
+.suggestion-item:last-child {
+    border-bottom: none !important;
+}
+
+.suggestion-item.selected {
+    background-color: #e3f2fd !important;
+}
+
+#destinationSuggestions {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: 1px solid #dee2e6;
+}
+
+/* ...existing code... */
+</style>
 {% endblock %}

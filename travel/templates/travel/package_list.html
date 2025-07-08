@@ -3,144 +3,596 @@
 {% block title %}Travel Packages - Travel Management System{% endblock %}
 
 {% block content %}
-<div class="container my-5">
-    <div class="row">
-        <div class="col-md-3">
-            <div class="card">
-                <div class="card-header">
-                    <h5>Filter Packages</h5>
-                </div>
-                <div class="card-body">
-                    <form method="get">
-                        <div class="mb-3">
-                            <label for="search" class="form-label">Search</label>
-                            <input type="text" class="form-control" id="search" name="search" value="{{ search_query }}"
-                                placeholder="Search packages...">
-                        </div>
-                        <div class="mb-3">
-                            <label for="destination" class="form-label">Destination</label>
-                            <select class="form-select" id="destination" name="destination">
-                                <option value="">All Destinations</option>
-                                {% for dest in destinations %}
-                                <option value="{{ dest.id }}">{{ dest.name }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="type" class="form-label">Package Type</label>
-                            <select class="form-select" id="type" name="type">
-                                <option value="">All Types</option>
-                                <option value="tour">Tour Package</option>
-                                <option value="hotel">Hotel Package</option>
-                                <option value="transport">Transport Package</option>
-                                <option value="combo">Combo Package</option>
-                            </select>
-                        </div>
-                        <div class="row">
-                            <div class="col-6">
-                                <label for="min_price" class="form-label">Min Price</label>
-                                <input type="number" class="form-control" id="min_price" name="min_price"
-                                    value="{{ min_price }}" step="0.01">
-                            </div>
-                            <div class="col-6">
-                                <label for="max_price" class="form-label">Max Price</label>
-                                <input type="number" class="form-control" id="max_price" name="max_price"
-                                    value="{{ max_price }}" step="0.01">
-                            </div>
-                        </div>
-                        <button type="submit" class="btn btn-success w-100 mt-3">Filter</button>
-                        <a href="{% url 'package_list' %}" class="btn btn-secondary w-100 mt-2">Clear Filters</a>
-                    </form>
-                </div>
-            </div>
-        </div>
+<style>
+    .package-hero {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 60px 0;
+        margin-bottom: 40px;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .package-hero::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 100" fill="rgba(255,255,255,0.1)"><polygon points="0,0 1000,100 1000,0"/></svg>');
+        background-size: cover;
+        opacity: 0.3;
+    }
+    
+    .package-hero .container {
+        position: relative;
+        z-index: 1;
+    }
+    
+    .filter-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        border: none;
+        transition: all 0.3s ease;
+        position: sticky;
+        top: 100px;
+    }
+    
+    .filter-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    }
+    
+    .filter-card .card-header {
+        background: linear-gradient(135deg, #198754, #20c997);
+        color: white;
+        border-radius: 15px 15px 0 0;
+        border: none;
+        padding: 20px;
+    }
+    
+    .filter-card .card-header h5 {
+        margin: 0;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .filter-card .card-body {
+        padding: 25px;
+    }
+    
+    .form-control, .form-select {
+        border-radius: 10px;
+        border: 2px solid #e9ecef;
+        padding: 12px 16px;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #198754;
+        box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25);
+    }
+    
+    .package-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        border: none;
+        transition: all 0.3s ease;
+        overflow: hidden;
+        position: relative;
+    }
+    
+    .package-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    }
+    
+    .package-card .card-img-top {
+        height: 220px;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+    
+    .package-card:hover .card-img-top {
+        transform: scale(1.05);
+    }
+    
+    .package-card .card-body {
+        padding: 25px;
+    }
+    
+    .package-card .card-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 15px;
+        color: #2d3748;
+    }
+    
+    .package-card .card-text {
+        color: #718096;
+        line-height: 1.6;
+        margin-bottom: 15px;
+    }
+    
+    .package-info {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 10px;
+        color: #4a5568;
+        font-size: 0.9rem;
+    }
+    
+    .package-info i {
+        color: #198754;
+        width: 16px;
+    }
+    
+    .package-price {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #198754;
+        margin: 0;
+    }
+    
+    .package-rating {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    .package-rating .stars {
+        color: #ffd700;
+    }
+    
+    .package-rating .rating-text {
+        color: #718096;
+        font-size: 0.9rem;
+    }
+    
+    .package-type-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: linear-gradient(135deg, #198754, #20c997);
+        color: white;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+    
+    .featured-badge {
+        position: absolute;
+        top: 15px;
+        left: 15px;
+        background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+        color: white;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+    
+    .btn-view-details {
+        background: linear-gradient(135deg, #198754, #20c997);
+        border: none;
+        border-radius: 12px;
+        padding: 12px 20px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .btn-view-details:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(25, 135, 84, 0.3);
+    }
+    
+    .btn-view-details::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.5s;
+    }
+    
+    .btn-view-details:hover::before {
+        left: 100%;
+    }
+    
+    .results-header {
+        background: white;
+        padding: 25px;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        margin-bottom: 30px;
+    }
+    
+    .results-count {
+        font-size: 1.1rem;
+        color: #4a5568;
+        margin: 0;
+    }
+    
+    .sort-dropdown {
+        border-radius: 10px;
+        border: 2px solid #e9ecef;
+        padding: 8px 16px;
+    }
+    
+    .no-packages {
+        text-align: center;
+        padding: 60px 20px;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    }
+    
+    .no-packages i {
+        font-size: 4rem;
+        color: #cbd5e0;
+        margin-bottom: 20px;
+    }
+    
+    .no-packages h4 {
+        color: #4a5568;
+        margin-bottom: 15px;
+    }
+    
+    .no-packages p {
+        color: #718096;
+        font-size: 1.1rem;
+    }
+    
+    .package-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 25px;
+    }
+    
+    @media (max-width: 768px) {
+        .package-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .filter-card {
+            position: static;
+            margin-bottom: 20px;
+        }
+        
+        .package-hero {
+            padding: 40px 0;
+        }
+    }
+</style>
 
-        <div class="col-md-9">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2>Travel Packages</h2>
-                <p class="text-muted">{{ page_obj.paginator.count }} packages found</p>
+<!-- Hero Section -->
+<div class="package-hero">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h1 class="display-4 fw-bold mb-3">
+                    <i class="fas fa-suitcase-rolling me-3"></i>
+                    Travel Packages
+                </h1>
+                <p class="lead mb-0">Discover amazing travel packages tailored to your dreams. From exotic destinations to comfortable stays, we've got everything covered.</p>
             </div>
-
-            <div class="row">
-                {% for package in page_obj %}
-                <div class="col-md-6 col-lg-4 mb-4">
-                    <div class="card h-100">
-                        {% if package.image %}
-                        <img src="{{ package.image.url }}" class="card-img-top" alt="{{ package.name }}"
-                            style="height: 200px; object-fit: cover;">
-                        {% else %}
-                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center"
-                            style="height: 200px;">
-                            <div class="text-center">
-                                <i class="fas fa-image fa-3x text-muted"></i>
-                                <p class="text-muted mt-2">No Image</p>
-                            </div>
-                        </div>
-                        {% endif %}
-                        <div class="card-body">
-                            <h5 class="card-title">{{ package.name }}</h5>
-                            <p class="card-text">{{ package.description|truncatewords:15 }}</p>
-                            <p class="card-text">
-                                <small class="text-muted">
-                                    <i class="fas fa-map-marker-alt"></i> {{ package.destination.name }}
-                                </small>
-                            </p>
-                            <p class="card-text">
-                                <small class="text-muted">
-                                    <i class="fas fa-clock"></i> {{ package.duration_days }} days
-                                </small>
-                            </p>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span class="h5 text-success">${{ package.price }}</span>
-                                <div class="rating">
-                                    {% for i in "12345" %}
-                                    {% if forloop.counter <= package.average_rating %} <i
-                                        class="fas fa-star text-warning"></i>
-                                        {% else %}
-                                        <i class="far fa-star text-warning"></i>
-                                        {% endif %}
-                                        {% endfor %}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card-footer">
-                            <a href="{% url 'package_detail' package.id %}" class="btn btn-success w-100">View
-                                Details</a>
-                        </div>
+            <div class="col-lg-4 text-lg-end">
+                <div class="d-flex align-items-center justify-content-lg-end gap-3">
+                    <div class="text-center">
+                        <i class="fas fa-globe-americas fa-2x mb-2"></i>
+                        <p class="mb-0 small">50+ Destinations</p>
+                    </div>
+                    <div class="text-center">
+                        <i class="fas fa-star fa-2x mb-2"></i>
+                        <p class="mb-0 small">4.8 Rating</p>
+                    </div>
+                    <div class="text-center">
+                        <i class="fas fa-users fa-2x mb-2"></i>
+                        <p class="mb-0 small">10K+ Travelers</p>
                     </div>
                 </div>
-                {% empty %}
-                <div class="col-12">
-                    <div class="alert alert-info">
-                        <h4>No packages found</h4>
-                        <p>No packages match your search criteria. <a href="{% url 'package_list' %}">Clear filters</a>
-                            to see all packages.</p>
-                    </div>
-                </div>
-                {% endfor %}
             </div>
         </div>
     </div>
 </div>
 
+<div class="container">
+    <div class="row">
+        <!-- Enhanced Filter Sidebar -->
+        <div class="col-lg-3 mb-4">
+            <div class="card filter-card">
+                <div class="card-header">
+                    <h5>
+                        <i class="fas fa-filter"></i>
+                        Filter Packages
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="get" id="filterForm">
+                        <div class="mb-4">
+                            <label for="search" class="form-label fw-semibold">
+                                <i class="fas fa-search me-2"></i>Search
+                            </label>
+                            <input type="text" class="form-control" id="search" name="search" 
+                                   value="{{ search_query }}" placeholder="Search packages...">
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="destination" class="form-label fw-semibold">
+                                <i class="fas fa-map-marker-alt me-2"></i>Destination
+                            </label>
+                            <select class="form-select" id="destination" name="destination">
+                                <option value="">All Destinations</option>
+                                {% for dest in destinations %}
+                                <option value="{{ dest.id }}" {% if dest.id|stringformat:"s" == request.GET.destination %}selected{% endif %}>
+                                    {{ dest.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="type" class="form-label fw-semibold">
+                                <i class="fas fa-tag me-2"></i>Package Type
+                            </label>
+                            <select class="form-select" id="type" name="type">
+                                <option value="">All Types</option>
+                                <option value="tour" {% if request.GET.type == 'tour' %}selected{% endif %}>Tour Package</option>
+                                <option value="hotel" {% if request.GET.type == 'hotel' %}selected{% endif %}>Hotel Package</option>
+                                <option value="transport" {% if request.GET.type == 'transport' %}selected{% endif %}>Transport Package</option>
+                                <option value="combo" {% if request.GET.type == 'combo' %}selected{% endif %}>Combo Package</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">
+                                <i class="fas fa-dollar-sign me-2"></i>Price Range
+                            </label>
+                            <div class="row">
+                                <div class="col-6">
+                                    <input type="number" class="form-control" id="min_price" name="min_price"
+                                           value="{{ min_price }}" step="0.01" placeholder="Min">
+                                </div>
+                                <div class="col-6">
+                                    <input type="number" class="form-control" id="max_price" name="max_price"
+                                           value="{{ max_price }}" step="0.01" placeholder="Max">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-search me-2"></i>Apply Filters
+                            </button>
+                            <a href="{% url 'package_list' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-2"></i>Clear Filters
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Enhanced Package Grid -->
+        <div class="col-lg-9">
+            <div class="results-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2 class="h4 mb-2">Available Packages</h2>
+                        <p class="results-count">
+                            <i class="fas fa-box me-2"></i>
+                            {{ page_obj.paginator.count }} package{{ page_obj.paginator.count|pluralize }} found
+                        </p>
+                    </div>
+                    <div class="d-flex align-items-center gap-3">
+                        <label for="sort" class="form-label mb-0 fw-semibold">Sort by:</label>
+                        <select class="form-select sort-dropdown" id="sort" name="sort" style="width: auto;">
+                            <option value="name">Name</option>
+                            <option value="price">Price</option>
+                            <option value="rating">Rating</option>
+                            <option value="duration">Duration</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="package-grid">
+                {% for package in page_obj %}
+                <div class="package-card card h-100">
+                    {% if package.is_featured %}
+                        <div class="featured-badge">
+                            <i class="fas fa-star me-1"></i>Featured
+                        </div>
+                    {% endif %}
+                    
+                    <div class="package-type-badge">
+                        {{ package.get_package_type_display }}
+                    </div>
+                    
+                    <div class="position-relative overflow-hidden">
+                        {% if package.image %}
+                        <img src="{{ package.image.url }}" class="card-img-top" alt="{{ package.name }}">
+                        {% else %}
+                        <div class="card-img-top bg-gradient d-flex align-items-center justify-content-center" style="height: 220px; background: linear-gradient(135deg, #f8f9fa, #e9ecef);">
+                            <div class="text-center">
+                                <i class="fas fa-mountain fa-3x text-muted mb-2"></i>
+                                <p class="text-muted mb-0">No Image Available</p>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="card-body">
+                        <h5 class="card-title">{{ package.name }}</h5>
+                        <p class="card-text">{{ package.description|truncatewords:20 }}</p>
+                        
+                        <div class="package-info">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>{{ package.destination.name }}, {{ package.destination.country }}</span>
+                        </div>
+                        
+                        <div class="package-info">
+                            <i class="fas fa-clock"></i>
+                            <span>{{ package.duration_days }} day{{ package.duration_days|pluralize }}</span>
+                        </div>
+                        
+                        <div class="package-info">
+                            <i class="fas fa-users"></i>
+                            <span>Up to {{ package.max_people }} people</span>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <div class="package-rating">
+                                <div class="stars">
+                                    {% for i in "12345" %}
+                                        {% if forloop.counter <= package.average_rating %}
+                                            <i class="fas fa-star"></i>
+                                        {% else %}
+                                            <i class="far fa-star"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                                <span class="rating-text">({{ package.average_rating|floatformat:1 }})</span>
+                            </div>
+                            <p class="package-price">${{ package.price }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="card-footer bg-transparent border-0 p-3">
+                        <a href="{% url 'package_detail' package.id %}" class="btn btn-view-details w-100">
+                            <i class="fas fa-eye me-2"></i>View Details
+                        </a>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12">
+                    <div class="no-packages">
+                        <i class="fas fa-search"></i>
+                        <h4>No packages found</h4>
+                        <p>No packages match your search criteria. Try adjusting your filters or browse all packages.</p>
+                        <a href="{% url 'package_list' %}" class="btn btn-success btn-lg mt-3">
+                            <i class="fas fa-refresh me-2"></i>View All Packages
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Enhanced Pagination -->
+            {% if page_obj.has_other_pages %}
+            <div class="d-flex justify-content-center mt-5">
+                <nav aria-label="Package pagination">
+                    <ul class="pagination pagination-lg">
+                        {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.destination %}&destination={{ request.GET.destination }}{% endif %}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.min_price %}&min_price={{ request.GET.min_price }}{% endif %}{% if request.GET.max_price %}&max_price={{ request.GET.max_price }}{% endif %}">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        </li>
+                        {% endif %}
+                        
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.destination %}&destination={{ request.GET.destination }}{% endif %}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.min_price %}&min_price={{ request.GET.min_price }}{% endif %}{% if request.GET.max_price %}&max_price={{ request.GET.max_price }}{% endif %}">{{ num }}</a>
+                            </li>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.destination %}&destination={{ request.GET.destination }}{% endif %}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.min_price %}&min_price={{ request.GET.min_price }}{% endif %}{% if request.GET.max_price %}&max_price={{ request.GET.max_price }}{% endif %}">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
 <script>
-    // JavaScript to maintain form state after submission
-    document.addEventListener('DOMContentLoaded', function () {
-        // Set selected values from URL parameters
+    document.addEventListener('DOMContentLoaded', function() {
+        // Enhanced filter form functionality
+        const filterForm = document.getElementById('filterForm');
+        const sortSelect = document.getElementById('sort');
+        
+        // Auto-submit form when sort changes
+        sortSelect.addEventListener('change', function() {
+            const currentUrl = new URL(window.location);
+            currentUrl.searchParams.set('sort', this.value);
+            window.location.href = currentUrl.toString();
+        });
+        
+        // Preserve form state
         const urlParams = new URLSearchParams(window.location.search);
-
-        // Set destination select
-        const destinationSelect = document.getElementById('destination');
-        const selectedDestination = urlParams.get('destination');
-        if (selectedDestination && destinationSelect) {
-            destinationSelect.value = selectedDestination;
+        
+        // Set form values from URL
+        ['search', 'destination', 'type', 'min_price', 'max_price'].forEach(param => {
+            const element = document.getElementById(param);
+            const value = urlParams.get(param);
+            if (element && value) {
+                element.value = value;
+            }
+        });
+        
+        // Set sort value
+        const sortValue = urlParams.get('sort');
+        if (sortValue) {
+            sortSelect.value = sortValue;
         }
-
-        // Set type select
-        const typeSelect = document.getElementById('type');
-        const selectedType = urlParams.get('type');
-        if (selectedType && typeSelect) {
-            typeSelect.value = selectedType;
+        
+        // Real-time search with debounce
+        const searchInput = document.getElementById('search');
+        let searchTimeout;
+        
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                filterForm.submit();
+            }, 1000);
+        });
+        
+        // Form validation
+        filterForm.addEventListener('submit', function(e) {
+            const minPrice = document.getElementById('min_price').value;
+            const maxPrice = document.getElementById('max_price').value;
+            
+            if (minPrice && maxPrice && parseFloat(minPrice) > parseFloat(maxPrice)) {
+                e.preventDefault();
+                alert('Minimum price cannot be greater than maximum price');
+                return false;
+            }
+        });
+        
+        // Smooth scroll to results after filter
+        if (urlParams.has('search') || urlParams.has('destination') || urlParams.has('type') || urlParams.has('min_price') || urlParams.has('max_price')) {
+            document.querySelector('.results-header').scrollIntoView({ behavior: 'smooth' });
         }
     });
 </script>

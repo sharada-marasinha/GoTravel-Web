@@ -3,66 +3,1006 @@
 {% block title %}Book {{ package.name }} - Travel Management System{% endblock %}
 
 {% block content %}
-<div class="container my-5">
-    <div class="row">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">
-                    <h4>Book Your Package</h4>
-                </div>
-                <div class="card-body">
-                    <form method="post">
-                        {% csrf_token %}
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="{{ form.travel_date.id_for_label }}" class="form-label">Travel
-                                        Date</label>
-                                    {{ form.travel_date }}
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="{{ form.return_date.id_for_label }}" class="form-label">Return Date
-                                        (Optional)</label>
-                                    {{ form.return_date }}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="{{ form.num_people.id_for_label }}" class="form-label">Number of People</label>
-                            {{ form.num_people }}
-                        </div>
-                        <div class="mb-3">
-                            <label for="{{ form.special_requests.id_for_label }}" class="form-label">Special
-                                Requests</label>
-                            {{ form.special_requests }}
-                        </div>
-                        <button type="submit" class="btn btn-success btn-lg">Book Package</button>
-                    </form>
-                </div>
-            </div>
-        </div>
+<style>
+    .booking-hero {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 60px 0;
+        margin-bottom: 40px;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .booking-hero::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 100" fill="rgba(255,255,255,0.1)"><polygon points="0,0 1000,100 1000,0"/></svg>');
+        background-size: cover;
+        opacity: 0.3;
+    }
+    
+    .booking-hero .container {
+        position: relative;
+        z-index: 1;
+    }
+    
+    .booking-progress {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    .progress-steps {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    
+    .step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        flex: 1;
+        position: relative;
+    }
+    
+    .step::before {
+        content: '';
+        position: absolute;
+        top: 20px;
+        left: 50%;
+        width: 100%;
+        height: 2px;
+        background: #e9ecef;
+        z-index: 1;
+    }
+    
+    .step:first-child::before {
+        display: none;
+    }
+    
+    .step.active::before {
+        background: #198754;
+    }
+    
+    .step-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #e9ecef;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 10px;
+        z-index: 2;
+        position: relative;
+        font-weight: 600;
+        color: #6c757d;
+    }
+    
+    .step.active .step-circle {
+        background: #198754;
+        color: white;
+    }
+    
+    .step.completed .step-circle {
+        background: #198754;
+        color: white;
+    }
+    
+    .step-label {
+        font-size: 0.9rem;
+        color: #6c757d;
+        text-align: center;
+    }
+    
+    .step.active .step-label {
+        color: #198754;
+        font-weight: 600;
+    }
+    
+    .booking-form-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+        border: none;
+        overflow: hidden;
+    }
+    
+    .booking-form-card .card-header {
+        background: linear-gradient(135deg, #198754, #20c997);
+        color: white;
+        padding: 25px;
+        border: none;
+    }
+    
+    .booking-form-card .card-header h4 {
+        margin: 0;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .booking-form-card .card-body {
+        padding: 35px;
+    }
+    
+    .form-section {
+        margin-bottom: 35px;
+    }
+    
+    .form-section h5 {
+        color: #2d3748;
+        margin-bottom: 20px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .form-group {
+        margin-bottom: 25px;
+    }
+    
+    .form-label {
+        font-weight: 600;
+        color: #4a5568;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .form-control {
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 15px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: #f8f9fa;
+    }
+    
+    .form-control:focus {
+        border-color: #198754;
+        box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25);
+        background: white;
+    }
+    
+    .form-control:hover {
+        border-color: #cbd5e0;
+        background: white;
+    }
+    
+    .date-input-group {
+        position: relative;
+    }
+    
+    .date-input-group .form-control {
+        padding-right: 45px;
+    }
+    
+    .date-input-group .calendar-icon {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #718096;
+        pointer-events: none;
+    }
+    
+    .people-counter {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 10px 20px;
+        border: 2px solid #e2e8f0;
+        transition: all 0.3s ease;
+    }
+    
+    .people-counter:hover {
+        border-color: #cbd5e0;
+        background: white;
+    }
+    
+    .people-counter .counter-btn {
+        background: #198754;
+        color: white;
+        border: none;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .people-counter .counter-btn:hover {
+        background: #157347;
+        transform: scale(1.1);
+    }
+    
+    .people-counter .counter-btn:disabled {
+        background: #6c757d;
+        cursor: not-allowed;
+        transform: none;
+    }
+    
+    .people-counter .counter-value {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #2d3748;
+        min-width: 60px;
+        text-align: center;
+    }
+    
+    .package-summary-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+        border: none;
+        position: sticky;
+        top: 120px;
+        overflow: hidden;
+    }
+    
+    .package-summary-card .card-header {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        padding: 25px;
+        border: none;
+    }
+    
+    .package-summary-card .card-header h5 {
+        margin: 0;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .package-summary-card .card-body {
+        padding: 25px;
+    }
+    
+    .package-image {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        border-radius: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .package-info {
+        margin-bottom: 20px;
+    }
+    
+    .package-info h5 {
+        color: #2d3748;
+        margin-bottom: 10px;
+        font-weight: 600;
+    }
+    
+    .package-detail {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 0;
+        border-bottom: 1px solid #e2e8f0;
+        margin-bottom: 10px;
+    }
+    
+    .package-detail:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+    }
+    
+    .package-detail .label {
+        color: #718096;
+        font-weight: 500;
+    }
+    
+    .package-detail .value {
+        color: #2d3748;
+        font-weight: 600;
+    }
+    
+    .price-breakdown {
+        background: #f8f9fa;
+        border-radius: 15px;
+        padding: 20px;
+        margin: 20px 0;
+    }
+    
+    .price-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+    
+    .price-item:last-child {
+        margin-bottom: 0;
+        padding-top: 10px;
+        border-top: 2px solid #e2e8f0;
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+    
+    .price-item .label {
+        color: #4a5568;
+    }
+    
+    .price-item .value {
+        color: #198754;
+        font-weight: 600;
+    }
+    
+    .total-price {
+        font-size: 1.8rem;
+        color: #198754;
+        font-weight: 700;
+    }
+    
+    .btn-book-package {
+        background: linear-gradient(135deg, #198754, #20c997);
+        border: none;
+        border-radius: 15px;
+        padding: 18px 30px;
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: white;
+        width: 100%;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .btn-book-package:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(25, 135, 84, 0.4);
+        color: white;
+    }
+    
+    .btn-book-package::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.5s;
+    }
+    
+    .btn-book-package:hover::before {
+        left: 100%;
+    }
+    
+    .btn-book-package:disabled {
+        background: #6c757d;
+        cursor: not-allowed;
+        transform: none;
+    }
+    
+    .btn-book-package:disabled::before {
+        display: none;
+    }
+    
+    .security-info {
+        background: #e8f5e8;
+        border-radius: 10px;
+        padding: 15px;
+        margin-top: 20px;
+        border-left: 4px solid #198754;
+    }
+    
+    .security-info .security-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 8px;
+        font-size: 0.9rem;
+        color: #155724;
+    }
+    
+    .security-info .security-item:last-child {
+        margin-bottom: 0;
+    }
+    
+    .security-info .security-item i {
+        color: #198754;
+        width: 16px;
+    }
+    
+    .form-error {
+        color: #dc3545;
+        font-size: 0.875rem;
+        margin-top: 5px;
+    }
+    
+    .form-help {
+        color: #6c757d;
+        font-size: 0.875rem;
+        margin-top: 5px;
+    }
+    
+    .breadcrumb-nav {
+        background: transparent;
+        padding: 20px 0;
+        margin-bottom: 20px;
+    }
+    
+    .breadcrumb-nav .breadcrumb {
+        background: white;
+        padding: 15px 25px;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        margin: 0;
+    }
+    
+    .breadcrumb-nav .breadcrumb-item a {
+        color: #198754;
+        text-decoration: none;
+        font-weight: 500;
+    }
+    
+    .breadcrumb-nav .breadcrumb-item a:hover {
+        text-decoration: underline;
+    }
+    
+    .breadcrumb-nav .breadcrumb-item.active {
+        color: #4a5568;
+        font-weight: 600;
+    }
+    
+    @media (max-width: 768px) {
+        .booking-hero {
+            padding: 40px 0;
+        }
+        
+        .booking-hero h1 {
+            font-size: 2rem;
+        }
+        
+        .package-summary-card {
+            position: static;
+            margin-top: 30px;
+        }
+        
+        .booking-form-card .card-body {
+            padding: 25px;
+        }
+        
+        .progress-steps {
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .step {
+            flex: none;
+            width: 120px;
+        }
+        
+        .step::before {
+            display: none;
+        }
+    }
+</style>
 
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-header">
-                    <h5>Package Summary</h5>
-                </div>
-                <div class="card-body">
-                    <img src="{{ package.image.url }}" class="img-fluid mb-3" alt="{{ package.name }}">
-                    <h5>{{ package.name }}</h5>
-                    <p class="text-muted">{{ package.destination.name }}</p>
-                    <p><strong>Duration:</strong> {{ package.duration_days }} days</p>
-                    <p><strong>Max People:</strong> {{ package.max_people }}</p>
-                    <hr>
-                    <div class="d-flex justify-content-between">
-                        <span>Price per person:</span>
-                        <span class="text-success font-weight-bold">${{ package.price }}</span>
+<!-- Breadcrumb Navigation -->
+<div class="breadcrumb-nav">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'package_list' %}">Packages</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'package_detail' package.id %}">{{ package.name }}</a></li>
+                <li class="breadcrumb-item active">Book Package</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<!-- Hero Section -->
+<div class="booking-hero">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h1 class="display-4 fw-bold mb-3">
+                    <i class="fas fa-calendar-check me-3"></i>
+                    Book Your Adventure
+                </h1>
+                <p class="lead mb-0">You're just a few steps away from booking your dream vacation package. Complete the form below to secure your spot.</p>
+            </div>
+            <div class="col-lg-4 text-lg-end">
+                <div class="d-flex align-items-center justify-content-lg-end gap-3">
+                    <div class="text-center">
+                        <i class="fas fa-shield-alt fa-2x mb-2"></i>
+                        <p class="mb-0 small">Secure Booking</p>
+                    </div>
+                    <div class="text-center">
+                        <i class="fas fa-headset fa-2x mb-2"></i>
+                        <p class="mb-0 small">24/7 Support</p>
+                    </div>
+                    <div class="text-center">
+                        <i class="fas fa-undo fa-2x mb-2"></i>
+                        <p class="mb-0 small">Free Cancel</p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<div class="container">
+    <!-- Booking Progress -->
+    <div class="booking-progress">
+        <div class="progress-steps">
+            <div class="step active">
+                <div class="step-circle">1</div>
+                <div class="step-label">Select Dates</div>
+            </div>
+            <div class="step">
+                <div class="step-circle">2</div>
+                <div class="step-label">Review Details</div>
+            </div>
+            <div class="step">
+                <div class="step-circle">3</div>
+                <div class="step-label">Payment</div>
+            </div>
+            <div class="step">
+                <div class="step-circle">4</div>
+                <div class="step-label">Confirmation</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Booking Form -->
+        <div class="col-lg-8">
+            <div class="booking-form-card card">
+                <div class="card-header">
+                    <h4>
+                        <i class="fas fa-edit"></i>
+                        Booking Details
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" id="bookingForm">
+                        {% csrf_token %}
+                        
+                        <!-- Travel Dates Section -->
+                        <div class="form-section">
+                            <h5>
+                                <i class="fas fa-calendar-alt"></i>
+                                Travel Dates
+                            </h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="{{ form.travel_date.id_for_label }}" class="form-label">
+                                            <i class="fas fa-plane-departure"></i>
+                                            Travel Date *
+                                        </label>
+                                        <div class="date-input-group">
+                                            {{ form.travel_date }}
+                                            <i class="fas fa-calendar-alt calendar-icon"></i>
+                                        </div>
+                                        {% if form.travel_date.errors %}
+                                            <div class="form-error">{{ form.travel_date.errors.0 }}</div>
+                                        {% endif %}
+                                        <div class="form-help">Select your departure date</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="{{ form.return_date.id_for_label }}" class="form-label">
+                                            <i class="fas fa-plane-arrival"></i>
+                                            Return Date (Optional)
+                                        </label>
+                                        <div class="date-input-group">
+                                            {{ form.return_date }}
+                                            <i class="fas fa-calendar-alt calendar-icon"></i>
+                                        </div>
+                                        {% if form.return_date.errors %}
+                                            <div class="form-error">{{ form.return_date.errors.0 }}</div>
+                                        {% endif %}
+                                        <div class="form-help">Leave blank for one-way trip</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Group Size Section -->
+                        <div class="form-section">
+                            <h5>
+                                <i class="fas fa-users"></i>
+                                Group Size
+                            </h5>
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-user-friends"></i>
+                                    Number of People *
+                                </label>
+                                <div class="people-counter">
+                                    <button type="button" class="counter-btn" id="decreasePeople">
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                    <div class="counter-value" id="peopleCount">1</div>
+                                    <button type="button" class="counter-btn" id="increasePeople">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                    {{ form.num_people }}
+                                </div>
+                                {% if form.num_people.errors %}
+                                    <div class="form-error">{{ form.num_people.errors.0 }}</div>
+                                {% endif %}
+                                <div class="form-help">Maximum {{ package.max_people }} people allowed</div>
+                            </div>
+                        </div>
+
+                        <!-- Special Requests Section -->
+                        <div class="form-section">
+                            <h5>
+                                <i class="fas fa-comment-dots"></i>
+                                Special Requests
+                            </h5>
+                            <div class="form-group">
+                                <label for="{{ form.special_requests.id_for_label }}" class="form-label">
+                                    <i class="fas fa-sticky-note"></i>
+                                    Additional Information
+                                </label>
+                                {{ form.special_requests }}
+                                {% if form.special_requests.errors %}
+                                    <div class="form-error">{{ form.special_requests.errors.0 }}</div>
+                                {% endif %}
+                                <div class="form-help">Tell us about any special requirements, dietary restrictions, or accessibility needs</div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-book-package" id="bookPackageBtn">
+                            <i class="fas fa-credit-card me-2"></i>
+                            Proceed to Payment
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Enhanced Package Summary -->
+        <div class="col-lg-4">
+            <div class="package-summary-card card">
+                <div class="card-header">
+                    <h5>
+                        <i class="fas fa-clipboard-list"></i>
+                        Package Summary
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if package.image %}
+                    <img src="{{ package.image.url }}" class="package-image" alt="{{ package.name }}">
+                    {% else %}
+                    <div class="package-image d-flex align-items-center justify-content-center bg-light">
+                        <i class="fas fa-image fa-3x text-muted"></i>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="package-info">
+                        <h5>{{ package.name }}</h5>
+                        <p class="text-muted mb-3">
+                            <i class="fas fa-map-marker-alt me-2"></i>
+                            {{ package.destination.name }}, {{ package.destination.country }}
+                        </p>
+                        
+                        <div class="package-detail">
+                            <div class="label">
+                                <i class="fas fa-clock me-2"></i>Duration
+                            </div>
+                            <div class="value">{{ package.duration_days }} day{{ package.duration_days|pluralize }}</div>
+                        </div>
+                        
+                        <div class="package-detail">
+                            <div class="label">
+                                <i class="fas fa-users me-2"></i>Max Group Size
+                            </div>
+                            <div class="value">{{ package.max_people }} people</div>
+                        </div>
+                        
+                        <div class="package-detail">
+                            <div class="label">
+                                <i class="fas fa-tag me-2"></i>Package Type
+                            </div>
+                            <div class="value">{{ package.get_package_type_display }}</div>
+                        </div>
+                        
+                        <div class="package-detail">
+                            <div class="label">
+                                <i class="fas fa-star me-2"></i>Rating
+                            </div>
+                            <div class="value">
+                                <span class="text-warning">
+                                    {% for i in "12345" %}
+                                        {% if forloop.counter <= package.average_rating %}
+                                            <i class="fas fa-star"></i>
+                                        {% else %}
+                                            <i class="far fa-star"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                </span>
+                                ({{ package.average_rating|floatformat:1 }})
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="price-breakdown">
+                        <div class="price-item">
+                            <div class="label">Base Price (per person)</div>
+                            <div class="value">${{ package.price }}</div>
+                        </div>
+                        <div class="price-item">
+                            <div class="label">Number of People</div>
+                            <div class="value" id="summaryPeopleCount">1</div>
+                        </div>
+                        <div class="price-item">
+                            <div class="label">Subtotal</div>
+                            <div class="value" id="subtotalAmount">${{ package.price }}</div>
+                        </div>
+                        <div class="price-item">
+                            <div class="label">Taxes & Fees</div>
+                            <div class="value" id="taxAmount">$0.00</div>
+                        </div>
+                        <div class="price-item">
+                            <div class="label">Total Amount</div>
+                            <div class="value total-price" id="totalAmount">${{ package.price }}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="security-info">
+                        <div class="security-item">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>Secure SSL encryption</span>
+                        </div>
+                        <div class="security-item">
+                            <i class="fas fa-lock"></i>
+                            <span>Safe payment processing</span>
+                        </div>
+                        <div class="security-item">
+                            <i class="fas fa-undo"></i>
+                            <span>Free cancellation within 24h</span>
+                        </div>
+                        <div class="security-item">
+                            <i class="fas fa-certificate"></i>
+                            <span>Best price guarantee</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Customer Support Card -->
+            <div class="card mt-4" style="border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                <div class="card-body text-center p-4">
+                    <h5 class="card-title">
+                        <i class="fas fa-headset text-primary me-2"></i>
+                        Need Assistance?
+                    </h5>
+                    <p class="text-muted small">Our booking specialists are available 24/7 to help you with your reservation.</p>
+                    <div class="d-grid gap-2">
+                        <a href="tel:+1234567890" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-phone me-2"></i>Call: +1 (234) 567-890
+                        </a>
+                        <a href="mailto:bookings@travel.com" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-envelope me-2"></i>Email Support
+                        </a>
+                        <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#chatModal">
+                            <i class="fas fa-comments me-2"></i>Live Chat
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chat Modal -->
+<div class="modal fade" id="chatModal" tabindex="-1" aria-labelledby="chatModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="chatModalLabel">
+                    <i class="fas fa-comments me-2"></i>Live Chat Support
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Our support team is currently online and ready to help you with your booking!
+                </div>
+                <p>How can we assist you today?</p>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-outline-primary btn-sm">Question about package details</button>
+                    <button class="btn btn-outline-primary btn-sm">Help with booking process</button>
+                    <button class="btn btn-outline-primary btn-sm">Payment or billing inquiry</button>
+                    <button class="btn btn-outline-primary btn-sm">Cancellation or changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const packagePrice = {{ package.price }};
+        const maxPeople = {{ package.max_people }};
+        const taxRate = 0.1; // 10% tax
+        
+        // Elements
+        const peopleCountDisplay = document.getElementById('peopleCount');
+        const peopleInput = document.getElementById('{{ form.num_people.id_for_label }}');
+        const decreaseBtn = document.getElementById('decreasePeople');
+        const increaseBtn = document.getElementById('increasePeople');
+        const summaryPeopleCount = document.getElementById('summaryPeopleCount');
+        const subtotalAmount = document.getElementById('subtotalAmount');
+        const taxAmount = document.getElementById('taxAmount');
+        const totalAmount = document.getElementById('totalAmount');
+        const bookingForm = document.getElementById('bookingForm');
+        const bookPackageBtn = document.getElementById('bookPackageBtn');
+        
+        // Initialize
+        let currentPeople = 1;
+        updatePeopleCounter();
+        updatePriceBreakdown();
+        
+        // People counter functionality
+        decreaseBtn.addEventListener('click', function() {
+            if (currentPeople > 1) {
+                currentPeople--;
+                updatePeopleCounter();
+                updatePriceBreakdown();
+            }
+        });
+        
+        increaseBtn.addEventListener('click', function() {
+            if (currentPeople < maxPeople) {
+                currentPeople++;
+                updatePeopleCounter();
+                updatePriceBreakdown();
+            }
+        });
+        
+        // Update people counter display
+        function updatePeopleCounter() {
+            peopleCountDisplay.textContent = currentPeople;
+            peopleInput.value = currentPeople;
+            
+            // Update button states
+            decreaseBtn.disabled = currentPeople <= 1;
+            increaseBtn.disabled = currentPeople >= maxPeople;
+        }
+        
+        // Update price breakdown
+        function updatePriceBreakdown() {
+            const subtotal = packagePrice * currentPeople;
+            const tax = subtotal * taxRate;
+            const total = subtotal + tax;
+            
+            summaryPeopleCount.textContent = currentPeople;
+            subtotalAmount.textContent = `$${subtotal.toFixed(2)}`;
+            taxAmount.textContent = `$${tax.toFixed(2)}`;
+            totalAmount.textContent = `$${total.toFixed(2)}`;
+        }
+        
+        // Form validation
+        bookingForm.addEventListener('submit', function(e) {
+            const travelDate = document.getElementById('{{ form.travel_date.id_for_label }}').value;
+            const returnDate = document.getElementById('{{ form.return_date.id_for_label }}').value;
+            
+            // Validate travel date
+            if (!travelDate) {
+                e.preventDefault();
+                alert('Please select a travel date');
+                return;
+            }
+            
+            // Validate date is in future
+            const today = new Date();
+            const selectedDate = new Date(travelDate);
+            if (selectedDate <= today) {
+                e.preventDefault();
+                alert('Travel date must be in the future');
+                return;
+            }
+            
+            // Validate return date if provided
+            if (returnDate && new Date(returnDate) <= selectedDate) {
+                e.preventDefault();
+                alert('Return date must be after travel date');
+                return;
+            }
+            
+            // Show loading state
+            bookPackageBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+            bookPackageBtn.disabled = true;
+        });
+        
+        // Date input enhancements
+        const dateInputs = document.querySelectorAll('input[type="date"]');
+        dateInputs.forEach(input => {
+            // Set minimum date to today
+            const today = new Date().toISOString().split('T')[0];
+            input.setAttribute('min', today);
+            
+            // Set maximum date to 1 year from now
+            const maxDate = new Date();
+            maxDate.setFullYear(maxDate.getFullYear() + 1);
+            input.setAttribute('max', maxDate.toISOString().split('T')[0]);
+        });
+        
+        // Auto-calculate return date
+        const travelDateInput = document.getElementById('{{ form.travel_date.id_for_label }}');
+        const returnDateInput = document.getElementById('{{ form.return_date.id_for_label }}');
+        
+        travelDateInput.addEventListener('change', function() {
+            if (this.value && !returnDateInput.value) {
+                const travelDate = new Date(this.value);
+                const returnDate = new Date(travelDate);
+                returnDate.setDate(returnDate.getDate() + {{ package.duration_days }});
+                returnDateInput.value = returnDate.toISOString().split('T')[0];
+            }
+        });
+        
+        // Animate progress steps
+        function animateProgressSteps() {
+            const steps = document.querySelectorAll('.step');
+            steps.forEach((step, index) => {
+                setTimeout(() => {
+                    step.style.opacity = '0';
+                    step.style.transform = 'translateY(20px)';
+                    
+                    setTimeout(() => {
+                        step.style.transition = 'all 0.5s ease';
+                        step.style.opacity = '1';
+                        step.style.transform = 'translateY(0)';
+                    }, 100);
+                }, index * 200);
+            });
+        }
+        
+        // Initialize animations
+        animateProgressSteps();
+        
+        // Form field focus animations
+        const formControls = document.querySelectorAll('.form-control');
+        formControls.forEach(control => {
+            control.addEventListener('focus', function() {
+                this.parentElement.style.transform = 'translateY(-2px)';
+            });
+            
+            control.addEventListener('blur', function() {
+                this.parentElement.style.transform = 'translateY(0)';
+            });
+        });
+        
+        // Smooth scrolling for form errors
+        if (document.querySelector('.form-error')) {
+            document.querySelector('.form-error').scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'center' 
+            });
+        }
+    });
+</script>
 {% endblock %}

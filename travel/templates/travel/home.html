@@ -1,151 +1,263 @@
 {% extends 'travel/base.html' %}
 
 {% block content %}
-<div class="hero-section bg-primary">
-    <div class="container text-center py-5">
-        <h1 class="display-4 mb-4 text-white">Discover Your Next Adventure</h1>
-        <p class="lead mb-4 text-white-50">Explore amazing destinations, book unforgettable experiences, and create memories that last a lifetime.</p>
-        
-        <!-- Search Component -->
-<div class="search-container p-4 shadow-sm bg-white rounded mx-auto border" style="max-width: 960px;">
-    <form method="get" action="{% url 'package_list' %}" id="searchForm">
-        <div class="row g-4">
-            <!-- Destination -->
-            <div class="col-md-6 col-lg-3">
-                <label for="destination" class="form-label text-dark fw-bold">Destination</label>
-                <div class="position-relative">
-                    <input type="text" class="form-control" id="destination" name="destination" 
-                           placeholder="Enter destination (e.g., Nuwara Eliya, Ella, Jaffna)" 
-                           autocomplete="off">
-                    <div id="destinationSuggestions" class="position-absolute w-100 bg-white border rounded mt-1 d-none" style="z-index: 1000; max-height: 300px; overflow-y: auto;">
-                        <!-- Auto-suggestions will be populated here -->
-                    </div>
-                    <div class="position-absolute top-50 end-0 translate-middle-y me-2">
-                        <div id="loadingSpinner" class="spinner-border spinner-border-sm text-primary d-none" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Travel Dates -->
-            <div class="col-md-6 col-lg-2">
-                <label for="start_date" class="form-label fw-semibold text-secondary">From Date</label>
-                <input type="date" class="form-control border-success" id="start_date" name="start_date"
-                    min="{{ today|date:'Y-m-d' }}">
-            </div>
-
-            <div class="col-md-6 col-lg-2">
-                <label for="end_date" class="form-label fw-semibold text-secondary">To Date</label>
-                <input type="date" class="form-control border-success" id="end_date" name="end_date"
-                    min="{{ today|date:'Y-m-d' }}">
-            </div>
-
-            <!-- Travelers -->
-            <div class="col-md-6 col-lg-3">
-                <label class="form-label fw-semibold text-secondary">Travelers</label>
-                <div class="dropdown">
-                    <button class="btn btn-outline-success dropdown-toggle w-100" type="button"
-                        id="travelersDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                        <span id="travelersText">2 Adults</span>
-                    </button>
-                    <div class="dropdown-menu p-3 border rounded-3 shadow-sm" style="min-width: 260px;">
-                        <div class="row mb-2 align-items-center">
-                            <div class="col-6">
-                                <label class="form-label small text-secondary">Adults</label>
-                            </div>
-                            <div class="col-6">
-                                <div class="input-group input-group-sm">
-                                    <button class="btn btn-outline-secondary" type="button"
-                                        onclick="changeTravelers('adults', -1)">-</button>
-                                    <input type="number"
-                                        class="form-control text-center border-secondary bg-light"
-                                        id="adults" name="adults" value="2" min="1" max="20" readonly>
-                                    <button class="btn btn-outline-secondary" type="button"
-                                        onclick="changeTravelers('adults', 1)">+</button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row align-items-center">
-                            <div class="col-6">
-                                <label class="form-label small text-secondary">Children</label>
-                            </div>
-                            <div class="col-6">
-                                <div class="input-group input-group-sm">
-                                    <button class="btn btn-outline-secondary" type="button"
-                                        onclick="changeTravelers('children', -1)">-</button>
-                                    <input type="number"
-                                        class="form-control text-center border-secondary bg-light"
-                                        id="children" name="children" value="0" min="0" max="10" readonly>
-                                    <button class="btn btn-outline-secondary" type="button"
-                                        onclick="changeTravelers('children', 1)">+</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Search Button -->
-            <div class="col-12 col-lg-2 d-grid align-items-end">
-                <button type="submit" class="btn btn-success w-100 mt-2 mt-lg-0">Search</button>
-            </div>
-        </div>
-    </form>
-</div>
-
-
+<!-- Enhanced Hero Section with Parallax Effect -->
+<div class="hero-section position-relative overflow-hidden">
+    <div class="hero-bg"></div>
+    <div class="hero-overlay"></div>
+    <div class="container position-relative">
+        <div class="row min-vh-75 align-items-center text-center">
+            <div class="col-12">
+                <div class="hero-content animate-fade-in">
+                    <h1 class="display-3 fw-bold text-white mb-4 animate-slide-up">
+                        Discover Your Next 
+                        <span class="text-gradient">Adventure</span>
+                    </h1>
+                    <p class="lead text-white-75 mb-5 mx-auto animate-slide-up" style="max-width: 600px; animation-delay: 0.2s;">
+                        Explore breathtaking destinations, book unforgettable experiences, and create memories that last a lifetime with our curated travel packages.
+                    </p>
                     
-                    <!-- Budget Range -->
-                    {% comment %} <div class="col-12">
-                        <label class="form-label text-dark fw-bold">Budget Range </label>
-                        <div class="row align-items-center">
-                            <div class="col-md-8">
-                                <input type="range" class="form-range" id="budgetRange" min="10000" max="1000000" 
-                                       value="100000" step="10000" oninput="updateBudgetDisplay()">
-                                <div class="d-flex justify-content-between">
-                                    <small class="text-dark">10,000</small>
-                                    <small class="text-dark">1,000,000</small>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="text-center">
-                                    <span class="badge bg-success fs-6" id="budgetDisplay">LKR 100,000</span>
-                                    <input type="hidden" name="max_price" id="max_price" value="100000">
+                    <!-- Ultra-Modern Search Component -->
+                    <div class="ultra-modern-search-container p-5 shadow-xl bg-white rounded-5 mx-auto animate-slide-up position-relative" style="max-width: 1200px; animation-delay: 0.4s;">
+                        <!-- Animated Background Elements -->
+                        <div class="search-bg-elements">
+                            <div class="floating-element element-1"></div>
+                            <div class="floating-element element-2"></div>
+                            <div class="floating-element element-3"></div>
+                        </div>
+                                                <!-- Search Suggestions Footer -->
+                        <div class="search-footer">
+                            <div class="popular-destinations">
+                                <span class="footer-label">Trending:</span>
+                                <div class="trending-tags">
+                                    <span class="trending-tag" onclick="setDestination('Hasthikuchchiya, Sri Lanka')">Hasthikuchchiya</span>
+                                    <span class="trending-tag" onclick="setDestination('Nilwala, Sri Lanka')">Nilwala Crocodile Safari Matara</span>
+                                    <span class="trending-tag" onclick="setDestination('New York, Sri Lanka')">Nuwaraeliya</span>
+                                    <span class="trending-tag" onclick="setDestination('Bolgoda, Sri Lanka')">Bolgoda</span>
+                                    <span class="trending-tag" onclick="setDestination('Panadura, Sri Lanka')">panadura jungle</span>
                                 </div>
                             </div>
                         </div>
-                    </div> {% endcomment %}
-                    
-                    <!-- Search Button -->
-                    <div class="col-12 pt-3">
-                        <button type="submit" class="btn btn-success btn-lg px-5">
-                            <i class="fas fa-search me-2"></i>Search Packages
-                        </button>
+                        <form method="get" action="{% url 'advanced_search' %}" id="modernSearchForm">
+                                                        <!-- Enhanced Quick Filters -->
+                            <div class="quick-filters-section">
+                                <div class="quick-filters-header">
+                                    <span class="quick-filters-title">
+                                        <i class="fas fa-magic me-2"></i>Curated Experiences:
+                                    </span>
+                                </div>
+                                <div class="quick-filters-container">
+                                    <button type="button" class="quick-filter-btn" onclick="setQuickFilter('adventure')" data-filter="adventure">
+                                        <div class="filter-icon">
+                                            <i class="fas fa-mountain"></i>
+                                        </div>
+                                        <span class="filter-text">Adventure</span>
+                                        <div class="filter-badge">Hot</div>
+                                        <div class="filter-overlay"></div>
+                                    </button>
+                                    <button type="button" class="quick-filter-btn" onclick="setQuickFilter('beach')" data-filter="beach">
+                                        <div class="filter-icon">
+                                            <i class="fas fa-umbrella-beach"></i>
+                                        </div>
+                                        <span class="filter-text">Beach</span>
+                                        <div class="filter-badge">Trending</div>
+                                        <div class="filter-overlay"></div>
+                                    </button>
+                                    <button type="button" class="quick-filter-btn" onclick="setQuickFilter('cultural')" data-filter="cultural">
+                                        <div class="filter-icon">
+                                            <i class="fas fa-university"></i>
+                                        </div>
+                                        <span class="filter-text">Cultural</span>
+                                        <div class="filter-overlay"></div>
+                                    </button>
+                                    <button type="button" class="quick-filter-btn" onclick="setQuickFilter('luxury')" data-filter="luxury">
+                                        <div class="filter-icon">
+                                            <i class="fas fa-crown"></i>
+                                        </div>
+                                        <span class="filter-text">Luxury</span>
+                                        <div class="filter-badge">Premium</div>
+                                        <div class="filter-overlay"></div>
+                                    </button>
+                                    <button type="button" class="quick-filter-btn" onclick="setQuickFilter('budget')" data-filter="budget">
+                                        <div class="filter-icon">
+                                            <i class="fas fa-wallet"></i>
+                                        </div>
+                                        <span class="filter-text">Budget</span>
+                                        <div class="filter-badge">Value</div>
+                                        <div class="filter-overlay"></div>
+                                    </button>
+                                    <button type="button" class="quick-filter-btn" onclick="setQuickFilter('romantic')" data-filter="romantic">
+                                        <div class="filter-icon">
+                                            <i class="fas fa-heart"></i>
+                                        </div>
+                                        <span class="filter-text">Romantic</span>
+                                        <div class="filter-overlay"></div>
+                                    </button>
+                                    <button type="button" class="quick-filter-btn" onclick="setQuickFilter('family')" data-filter="family">
+                                        <div class="filter-icon">
+                                            <i class="fas fa-users"></i>
+                                        </div>
+                                        <span class="filter-text">Family</span>
+                                        <div class="filter-overlay"></div>
+                                    </button>
+                                </div>
+                            </div>
+                            <!-- Quick Search Mode (Default) -->
+                            <div id="quickSearchMode" class="search-mode active">
+                                <!-- AI-Powered Main Search Bar -->
+                                <div class="ai-search-container mb-4">
+                                    <div class="ai-search-wrapper">
+                                        <div class="search-input-container">
+                                            <div class="search-input-prefix">
+                                                <div class="ai-indicator">
+                                                    <div class="ai-pulse"></div>
+                                                    <i class="fas fa-brain"></i>
+                                                </div>
+                                            </div>
+                                            <input type="text" class="ai-search-input" 
+                                                   id="aiDestination" name="destination" 
+                                                   placeholder="Tell me what kind of adventure you're looking for..." 
+                                                   autocomplete="off">
+                                            <div class="search-input-actions">
+                                                <button type="button" class="voice-search-btn" id="voiceSearchBtn" title="Voice Search">
+                                                    <i class="fas fa-microphone"></i>
+                                                </button>
+                                                <button type="button" class="camera-search-btn" id="cameraSearchBtn" title="Search by Image">
+                                                    <i class="fas fa-camera"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- AI Suggestions with Smart Auto-Complete -->
+                                        <div id="aiSuggestions" class="ai-suggestions-dropdown d-none">
+                                            <div class="suggestions-header">
+                                                <div class="ai-thinking">
+                                                    <div class="thinking-dots">
+                                                        <span></span><span></span><span></span>
+                                                    </div>
+                                                    <span class="thinking-text">AI is analyzing your preferences...</span>
+                                                </div>
+                                            </div>
+                                            <div class="suggestions-content">
+                                                <!-- Smart suggestions will be populated here -->
+                                            </div>
+                                            <div class="suggestions-footer">
+                                                <div class="suggestion-tips">
+                                                    <span class="tip">💡 Try: "Beach vacation for 2 weeks under $3000"</span>
+                                                    <span class="tip">🏔️ Or: "Mountain adventure with hiking and camping"</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Instant Smart Filters -->
+                                    <div class="smart-filters-row mt-3">
+                                        <div class="row g-2">
+                                            <div class="col-md-3">
+                                                <div class="smart-filter-group">
+                                                    <label class="smart-filter-label">
+                                                        <i class="fas fa-calendar-alt"></i> When?
+                                                    </label>
+                                                    <select class="smart-filter-select" id="whenFilter" name="when_filter">
+                                                        <option value="">Select dates</option>
+                                                        <option value="this_weekend">This Weekend</option>
+                                                        <option value="next_week">Next Week</option>
+                                                        <option value="next_month">Next Month</option>
+                                                        <option value="this_summer">This Summer</option>
+                                                        <option value="custom">Custom Dates</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="smart-filter-group">
+                                                    <label class="smart-filter-label">
+                                                        <i class="fas fa-users"></i> Who?
+                                                    </label>
+                                                    <select class="smart-filter-select" id="whoFilter" name="who_filter">
+                                                        <option value="">Select travelers</option>
+                                                        <option value="solo">Solo Traveler</option>
+                                                        <option value="couple">Couple</option>
+                                                        <option value="family">Family</option>
+                                                        <option value="friends">Friends Group</option>
+                                                        <option value="business">Business Trip</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="smart-filter-group">
+                                                    <label class="smart-filter-label">
+                                                        <i class="fas fa-wallet"></i> Budget
+                                                    </label>
+                                                    <select class="smart-filter-select" id="budgetFilter" name="budget_filter">
+                                                        <option value="">Any budget</option>
+                                                        <option value="budget">Budget ($100-$500)</option>
+                                                        <option value="mid">Mid-range ($500-$1500)</option>
+                                                        <option value="premium">Premium ($1500-$3000)</option>
+                                                        <option value="luxury">Luxury ($3000+)</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="smart-filter-group">
+                                                    <label class="smart-filter-label">
+                                                        <i class="fas fa-compass"></i> Vibe
+                                                    </label>
+                                                    <select class="smart-filter-select" id="vibeFilter" name="vibe_filter">
+                                                        <option value="">Any style</option>
+                                                        <option value="adventure">Adventure</option>
+                                                        <option value="relaxation">Relaxation</option>
+                                                        <option value="cultural">Cultural</option>
+                                                        <option value="romantic">Romantic</option>
+                                                        <option value="party">Party/Nightlife</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            
+                            <!-- Enhanced Ultra-Modern Search Button -->
+                            <div class="ultra-search-button-container mt-4">
+                                <button type="submit" class="ultra-search-btn" id="ultraSearchBtn">
+                                    <div class="btn-glow"></div>
+                                    <span class="btn-content">
+                                        <div class="btn-icon-container">
+                                            <i class="fas fa-rocket btn-icon"></i>
+                                        </div>
+                                        <span class="btn-text">Discover Amazing Places</span>
+                                        <div class="btn-arrow">
+                                            <i class="fas fa-arrow-right"></i>
+                                        </div>
+                                    </span>
+                                    <div class="btn-loading d-none">
+                                        <div class="loading-ripple">
+                                            <div></div>
+                                            <div></div>
+                                        </div>
+                                        <span>Finding perfect matches...</span>
+                                    </div>
+                                    <div class="btn-particles">
+                                        <span class="particle"></span>
+                                        <span class="particle"></span>
+                                        <span class="particle"></span>
+                                        <span class="particle"></span>
+                                        <span class="particle"></span>
+                                    </div>
+                                </button>
+                            </div>
+                            
+
+                        </form>
+                        
+
                     </div>
                 </div>
-            </form>
+            </div>
         </div>
     </div>
 </div>
-
-<div class="container my-5">
-    <div class="row">
-        <div class="col-md-4 text-center mb-4">
-            <i class="fas fa-map-marked-alt fa-3x text-success mb-3"></i>
-            <h4>Amazing Destinations</h4>
-            <p>Discover breathtaking locations around the world with our carefully curated destination guides.</p>
-        </div>
-        <div class="col-md-4 text-center mb-4">
-            <i class="fas fa-calendar-check fa-3x text-success mb-3"></i>
-            <h4>Easy Booking</h4>
-            <p>Book your dream vacation with just a few clicks. Our streamlined process makes planning effortless.</p>
-        </div>
-        <div class="col-md-4 text-center mb-4">
-            <i class="fas fa-headset fa-3x text-success mb-3"></i>
-            <h4>24/7 Support</h4>
-            <p>Our dedicated support team is always here to help you before, during, and after your trip.</p>
-        </div>
     </div>
 </div>
 
@@ -389,246 +501,716 @@
         </div>
     {% endif %}
 </div>
+
+<!-- Customer Testimonials Section -->
+<div class="bg-light py-5 my-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold mb-3">What Our Travelers Say</h2>
+            <p class="lead text-muted">Real experiences from real travelers</p>
+        </div>
+        <div class="row">
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="testimonial-card p-4 rounded-4 shadow-sm bg-white h-100">
+                    <div class="testimonial-rating mb-3">
+                        <i class="fas fa-star text-warning"></i>
+                        <i class="fas fa-star text-warning"></i>
+                        <i class="fas fa-star text-warning"></i>
+                        <i class="fas fa-star text-warning"></i>
+                        <i class="fas fa-star text-warning"></i>
+                    </div>
+                    <p class="testimonial-text mb-4">"Amazing experience! The booking process was seamless and the destinations were exactly as advertised. Our travel consultant was incredibly helpful throughout the entire journey."</p>
+                    <div class="testimonial-author d-flex align-items-center">
+                        <div class="author-avatar me-3">
+                            <img src="https://images.unsplash.com/photo-1494790108755-2616b612d5bb?w=60&h=60&fit=crop&crop=face" 
+                                 alt="Sarah Johnson" class="rounded-circle" width="50" height="50">
+                        </div>
+                        <div>
+                            <h6 class="mb-0">Sarah Johnson</h6>
+                            <small class="text-muted">Adventure Enthusiast</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="testimonial-card p-4 rounded-4 shadow-sm bg-white h-100">
+                    <div class="testimonial-rating mb-3">
+                        <i class="fas fa-star text-warning"></i>
+                        <i class="fas fa-star text-warning"></i>
+                        <i class="fas fa-star text-warning"></i>
+                        <i class="fas fa-star text-warning"></i>
+                        <i class="fas fa-star text-warning"></i>
+                    </div>
+                    <p class="testimonial-text mb-4">"Best travel service I've ever used! The packages are well-planned, affordable, and the customer support is outstanding. Already planning my next trip with them."</p>
+                    <div class="testimonial-author d-flex align-items-center">
+                        <div class="author-avatar me-3">
+                            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=60&h=60&fit=crop&crop=face" 
+                                 alt="Michael Chen" class="rounded-circle" width="50" height="50">
+                        </div>
+                        <div>
+                            <h6 class="mb-0">Michael Chen</h6>
+                            <small class="text-muted">Business Traveler</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="testimonial-card p-4 rounded-4 shadow-sm bg-white h-100">
+                    <div class="testimonial-rating mb-3">
+                        <i class="fas fa-star text-warning"></i>
+                        <i class="fas fa-star text-warning"></i>
+                        <i class="fas fa-star text-warning"></i>
+                        <i class="fas fa-star text-warning"></i>
+                        <i class="fas fa-star text-warning"></i>
+                    </div>
+                    <p class="testimonial-text mb-4">"Family vacation made easy! They took care of everything from flights to accommodations. The kids loved every moment and we created memories that will last a lifetime."</p>
+                    <div class="testimonial-author d-flex align-items-center">
+                        <div class="author-avatar me-3">
+                            <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=60&h=60&fit=crop&crop=face" 
+                                 alt="Emily Rodriguez" class="rounded-circle" width="50" height="50">
+                        </div>
+                        <div>
+                            <h6 class="mb-0">Emily Rodriguez</h6>
+                            <small class="text-muted">Family Traveler</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Newsletter Section -->
+<div class="newsletter-section py-5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 text-white mb-4 mb-lg-0">
+                <h2 class="display-6 fw-bold mb-3">Stay Updated</h2>
+                <p class="lead mb-4">Get exclusive travel deals, destination guides, and insider tips delivered to your inbox.</p>
+                <div class="newsletter-benefits">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="fas fa-check-circle me-3"></i>
+                        <span>Exclusive member-only deals</span>
+                    </div>
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="fas fa-check-circle me-3"></i>
+                        <span>Weekly destination spotlights</span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-check-circle me-3"></i>
+                        <span>Early access to new packages</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="newsletter-form bg-white p-4 rounded-4 shadow-lg">
+                    <h4 class="mb-3">Join Our Newsletter</h4>
+                    <form id="newsletterForm">
+                        <div class="mb-3">
+                            <input type="email" class="form-control form-control-lg" placeholder="Enter your email address" required>
+                        </div>
+                        <div class="mb-3">
+                            <select class="form-select form-select-lg">
+                                <option selected>Travel Interests</option>
+                                <option value="adventure">Adventure Travel</option>
+                                <option value="luxury">Luxury Travel</option>
+                                <option value="budget">Budget Travel</option>
+                                <option value="family">Family Travel</option>
+                                <option value="business">Business Travel</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-lg w-100">
+                            <i class="fas fa-paper-plane me-2"></i>Subscribe Now
+                        </button>
+                        <small class="text-muted d-block mt-2">
+                            <i class="fas fa-lock me-1"></i>Your email is safe with us. No spam, ever.
+                        </small>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Travel Tips Blog Section -->
+<div class="container my-5">
+    <div class="text-center mb-5">
+        <h2 class="display-5 fw-bold mb-3">Travel Tips & Guides</h2>
+        <p class="lead text-muted">Expert advice to make your travels unforgettable</p>
+    </div>
+    <div class="row">
+        <div class="col-lg-4 col-md-6 mb-4">
+            <article class="blog-card rounded-4 overflow-hidden shadow-sm h-100">
+                <div class="blog-image">
+                    <img src="https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=400&h=250&fit=crop" 
+                         alt="Packing Tips" class="w-100" style="height: 200px; object-fit: cover;">
+                    <div class="blog-category position-absolute top-0 start-0 m-3">
+                        <span class="badge bg-primary">Travel Tips</span>
+                    </div>
+                </div>
+                <div class="blog-content p-4 bg-white">
+                    <h5 class="blog-title mb-3">10 Essential Packing Tips for Any Destination</h5>
+                    <p class="blog-excerpt text-muted mb-3">Learn how to pack smart and travel light with these expert packing tips that will save you space and hassle.</p>
+                    <div class="blog-meta d-flex justify-content-between align-items-center">
+                        <small class="text-muted"><i class="fas fa-calendar me-1"></i>Dec 15, 2024</small>
+                        <a href="#" class="btn btn-sm btn-outline-primary">Read More</a>
+                    </div>
+                </div>
+            </article>
+        </div>
+        <div class="col-lg-4 col-md-6 mb-4">
+            <article class="blog-card rounded-4 overflow-hidden shadow-sm h-100">
+                <div class="blog-image">
+                    <img src="https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=400&h=250&fit=crop" 
+                         alt="Budget Travel" class="w-100" style="height: 200px; object-fit: cover;">
+                    <div class="blog-category position-absolute top-0 start-0 m-3">
+                        <span class="badge bg-success">Budget Travel</span>
+                    </div>
+                </div>
+                <div class="blog-content p-4 bg-white">
+                    <h5 class="blog-title mb-3">How to Travel the World on a Budget</h5>
+                    <p class="blog-excerpt text-muted mb-3">Discover proven strategies to explore amazing destinations without breaking the bank.</p>
+                    <div class="blog-meta d-flex justify-content-between align-items-center">
+                        <small class="text-muted"><i class="fas fa-calendar me-1"></i>Dec 10, 2024</small>
+                        <a href="#" class="btn btn-sm btn-outline-primary">Read More</a>
+                    </div>
+                </div>
+            </article>
+        </div>
+        <div class="col-lg-4 col-md-6 mb-4">
+            <article class="blog-card rounded-4 overflow-hidden shadow-sm h-100">
+                <div class="blog-image">
+                    <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&h=250&fit=crop" 
+                         alt="Solo Travel" class="w-100" style="height: 200px; object-fit: cover;">
+                    <div class="blog-category position-absolute top-0 start-0 m-3">
+                        <span class="badge bg-warning">Solo Travel</span>
+                    </div>
+                </div>
+                <div class="blog-content p-4 bg-white">
+                    <h5 class="blog-title mb-3">Solo Travel Safety Guide</h5>
+                    <p class="blog-excerpt text-muted mb-3">Essential safety tips and advice for confident solo travelers exploring new destinations.</p>
+                    <div class="blog-meta d-flex justify-content-between align-items-center">
+                        <small class="text-muted"><i class="fas fa-calendar me-1"></i>Dec 5, 2024</small>
+                        <a href="#" class="btn btn-sm btn-outline-primary">Read More</a>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </div>
+    <div class="text-center mt-4">
+        <a href="#" class="btn btn-outline-primary btn-lg">
+            <i class="fas fa-blog me-2"></i>Visit Our Blog
+        </a>
+    </div>
+</div>
+
+<!-- ...existing code for packages, hotels, destinations, transports... -->
 {% endblock %}
 
 {% block extra_js %}
 <script>
-// Improved auto-suggestions for destinations
-let debounceTimer;
-let selectedDestinationId = null;
+// Enhanced destination suggestions with fuzzy search
+const destinations = [
+    {% for dest in all_destinations %}
+        {
+            full: "{{ dest.name }}, {{ dest.city }}, {{ dest.country }}"
+        },
+    {% endfor %}
+];
 
-document.getElementById('destination').addEventListener('input', function() {
-    const input = this.value.trim();
-    const suggestions = document.getElementById('destinationSuggestions');
-    const spinner = document.getElementById('loadingSpinner');
-    
-    // Clear previous timer
-    clearTimeout(debounceTimer);
-    
-    if (input.length >= 2) {
-        // Show loading spinner
-        spinner.classList.remove('d-none');
+// Global variables
+let searchTimeout;
+let selectedSuggestionIndex = -1;
+let currentSearchMode = 'quick';
+
+// Enhanced search functionality with keyword matching
+class SearchManager {
+    constructor() {
+        this.searchInput = document.getElementById('aiDestination');
+        this.suggestionsContainer = document.getElementById('aiSuggestions');
+        this.searchForm = document.getElementById('modernSearchForm');
+        this.currentQuery = '';
+        this.debounceTimer = null;
         
-        // Debounce API calls
-        debounceTimer = setTimeout(() => {
-            fetchDestinationSuggestions(input);
-        }, 300);
-    } else {
-        suggestions.classList.add('d-none');
-        spinner.classList.add('d-none');
-        selectedDestinationId = null;
+        this.initializeEventListeners();
     }
-});
-
-function fetchDestinationSuggestions(query) {
-    const spinner = document.getElementById('loadingSpinner');
-    const suggestions = document.getElementById('destinationSuggestions');
     
-    fetch(`/api/destinations/?q=${encodeURIComponent(query)}`)
-        .then(response => response.json())
-        .then(data => {
-            spinner.classList.add('d-none');
+    initializeEventListeners() {
+        // Search input events
+        if (this.searchInput) {
+            this.searchInput.addEventListener('input', (e) => this.handleSearchInput(e));
+            this.searchInput.addEventListener('keydown', (e) => this.handleKeyDown(e));
+            this.searchInput.addEventListener('focus', () => this.showSuggestions());
+            this.searchInput.addEventListener('blur', () => this.hideSuggestions());
+        }
+        
+        // Form submission
+        if (this.searchForm) {
+            this.searchForm.addEventListener('submit', (e) => this.handleFormSubmit(e));
+        }
+        
+        // Quick filter buttons
+        document.querySelectorAll('.quick-filter-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => this.handleQuickFilter(e));
+        });
+    }
+    
+    handleSearchInput(e) {
+        this.currentQuery = e.target.value;
+        
+        // Clear previous timer
+        if (this.debounceTimer) {
+            clearTimeout(this.debounceTimer);
+        }
+        
+        // Debounce search requests
+        this.debounceTimer = setTimeout(() => {
+            if (this.currentQuery.length >= 2) {
+                this.fetchSuggestions(this.currentQuery);
+            } else {
+                this.hideSuggestions();
+            }
+        }, 300);
+    }
+    
+    async fetchSuggestions(query) {
+        try {
+            const response = await fetch(`/api/search/autocomplete/?q=${encodeURIComponent(query)}&limit=8`);
+            const data = await response.json();
             
             if (data.suggestions && data.suggestions.length > 0) {
-                const suggestionHTML = data.suggestions.map(dest => `
-                    <div class="suggestion-item p-3 border-bottom cursor-pointer d-flex align-items-center" 
-                         onclick="selectDestination('${dest.id}', '${dest.display}')" 
-                         onmouseover="this.style.backgroundColor='#f8f9fa'" 
-                         onmouseout="this.style.backgroundColor='white'">
-                        <div>
-                            <i class="fas fa-map-marker-alt text-primary me-2"></i>
-                            <strong>${dest.name}</strong>
-                            <br>
-                            <small class="text-muted">${dest.city}, ${dest.country}</small>
-                        </div>
-                    </div>
-                `).join('');
-                
-                suggestions.innerHTML = suggestionHTML;
-                suggestions.classList.remove('d-none');
+                this.displaySuggestions(data.suggestions);
             } else {
-                suggestions.innerHTML = `
-                    <div class="p-3 text-center text-muted">
-                        <i class="fas fa-search me-2"></i>
-                        No destinations found for "${query}"
-                    </div>
-                `;
-                suggestions.classList.remove('d-none');
+                this.hideSuggestions();
             }
-        })
-        .catch(error => {
+        } catch (error) {
             console.error('Error fetching suggestions:', error);
-            spinner.classList.add('d-none');
-            suggestions.classList.add('d-none');
+            this.hideSuggestions();
+        }
+    }
+    
+    displaySuggestions(suggestions) {
+        if (!this.suggestionsContainer) return;
+        
+        const suggestionsContent = this.suggestionsContainer.querySelector('.suggestions-content');
+        if (!suggestionsContent) return;
+        
+        suggestionsContent.innerHTML = '';
+        
+        suggestions.forEach((suggestion, index) => {
+            const suggestionElement = document.createElement('div');
+            suggestionElement.className = 'suggestion-item';
+            suggestionElement.innerHTML = `
+                <div class="suggestion-content">
+                    <div class="suggestion-icon">
+                        <i class="fas fa-${this.getSuggestionIcon(suggestion.type)}"></i>
+                    </div>
+                    <div class="suggestion-text">
+                        <div class="suggestion-title">${suggestion.text}</div>
+                        <div class="suggestion-subtitle">${this.getSuggestionSubtitle(suggestion)}</div>
+                    </div>
+                </div>
+            `;
+            
+            suggestionElement.addEventListener('click', () => this.selectSuggestion(suggestion));
+            suggestionsContent.appendChild(suggestionElement);
         });
-}
-
-function selectDestination(id, display) {
-    document.getElementById('destination').value = display;
-    document.getElementById('destinationSuggestions').classList.add('d-none');
-    selectedDestinationId = id;
-    
-    // Add hidden input for destination ID
-    const existingInput = document.querySelector('input[name="destination_id"]');
-    if (existingInput) {
-        existingInput.remove();
+        
+        this.showSuggestions();
     }
     
-    const hiddenInput = document.createElement('input');
-    hiddenInput.type = 'hidden';
-    hiddenInput.name = 'destination_id';
-    hiddenInput.value = id;
-    document.getElementById('searchForm').appendChild(hiddenInput);
-}
-
-// Handle keyboard navigation
-document.getElementById('destination').addEventListener('keydown', function(e) {
-    const suggestions = document.querySelectorAll('.suggestion-item');
-    let selectedIndex = -1;
+    getSuggestionIcon(type) {
+        const icons = {
+            'package': 'suitcase',
+            'destination': 'map-marker-alt',
+            'hotel': 'bed',
+            'transport': 'plane'
+        };
+        return icons[type] || 'search';
+    }
     
-    // Find currently selected item
-    suggestions.forEach((item, index) => {
-        if (item.classList.contains('selected')) {
-            selectedIndex = index;
+    getSuggestionSubtitle(suggestion) {
+        if (suggestion.type === 'package') {
+            return `${suggestion.destination} - $${suggestion.price}`;
+        } else if (suggestion.type === 'destination') {
+            return `${suggestion.packages_count} packages available`;
         }
-    });
+        return suggestion.destination || '';
+    }
     
-    if (e.key === 'ArrowDown') {
-        e.preventDefault();
-        selectedIndex = Math.min(selectedIndex + 1, suggestions.length - 1);
-        updateSelection(suggestions, selectedIndex);
-    } else if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        selectedIndex = Math.max(selectedIndex - 1, -1);
-        updateSelection(suggestions, selectedIndex);
-    } else if (e.key === 'Enter' && selectedIndex >= 0) {
-        e.preventDefault();
-        suggestions[selectedIndex].click();
-    } else if (e.key === 'Escape') {
-        document.getElementById('destinationSuggestions').classList.add('d-none');
-    }
-});
-
-function updateSelection(suggestions, selectedIndex) {
-    suggestions.forEach((item, index) => {
-        if (index === selectedIndex) {
-            item.classList.add('selected');
-            item.style.backgroundColor = '#e3f2fd';
-        } else {
-            item.classList.remove('selected');
-            item.style.backgroundColor = 'white';
+    selectSuggestion(suggestion) {
+        this.searchInput.value = suggestion.text;
+        this.hideSuggestions();
+        
+        // Auto-fill related fields based on suggestion type
+        if (suggestion.type === 'destination') {
+            this.autoFillDestination(suggestion);
+        } else if (suggestion.type === 'package') {
+            this.autoFillPackage(suggestion);
         }
-    });
-}
-
-// Hide suggestions when clicking outside
-document.addEventListener('click', function(e) {
-    if (!e.target.closest('#destination') && !e.target.closest('#destinationSuggestions')) {
-        document.getElementById('destinationSuggestions').classList.add('d-none');
-    }
-});
-
-// Clear destination ID when input is manually changed
-document.getElementById('destination').addEventListener('input', function() {
-    if (selectedDestinationId) {
-        const currentValue = this.value;
-        // If user types something different, clear the selected ID
+        
+        // Submit form
         setTimeout(() => {
-            if (this.value !== currentValue) {
-                selectedDestinationId = null;
-                const existingInput = document.querySelector('input[name="destination_id"]');
-                if (existingInput) {
-                    existingInput.remove();
-                }
-            }
+            this.searchForm.submit();
         }, 100);
     }
+    
+    autoFillDestination(suggestion) {
+        const smartFilters = {
+            'vibeFilter': 'cultural',
+            'budgetFilter': 'mid'
+        };
+        
+        Object.entries(smartFilters).forEach(([filterId, value]) => {
+            const element = document.getElementById(filterId);
+            if (element) {
+                element.value = value;
+            }
+        });
+    }
+    
+    autoFillPackage(suggestion) {
+        // Auto-fill budget based on package price
+        const budgetFilter = document.getElementById('budgetFilter');
+        if (budgetFilter && suggestion.price) {
+            const price = parseFloat(suggestion.price);
+            if (price < 500) {
+                budgetFilter.value = 'budget';
+            } else if (price < 1500) {
+                budgetFilter.value = 'mid';
+            } else if (price < 3000) {
+                budgetFilter.value = 'premium';
+            } else {
+                budgetFilter.value = 'luxury';
+            }
+        }
+    }
+    
+    showSuggestions() {
+        if (this.suggestionsContainer) {
+            this.suggestionsContainer.classList.remove('d-none');
+        }
+    }
+    
+    hideSuggestions() {
+        setTimeout(() => {
+            if (this.suggestionsContainer) {
+                this.suggestionsContainer.classList.add('d-none');
+            }
+        }, 200);
+    }
+    
+    handleKeyDown(e) {
+        const suggestions = this.suggestionsContainer?.querySelectorAll('.suggestion-item');
+        if (!suggestions || suggestions.length === 0) return;
+        
+        switch (e.key) {
+            case 'ArrowDown':
+                e.preventDefault();
+                this.selectedSuggestionIndex = Math.min(this.selectedSuggestionIndex + 1, suggestions.length - 1);
+                this.highlightSuggestion(suggestions);
+                break;
+            case 'ArrowUp':
+                e.preventDefault();
+                this.selectedSuggestionIndex = Math.max(this.selectedSuggestionIndex - 1, -1);
+                this.highlightSuggestion(suggestions);
+                break;
+            case 'Enter':
+                if (this.selectedSuggestionIndex >= 0) {
+                    e.preventDefault();
+                    suggestions[this.selectedSuggestionIndex].click();
+                }
+                break;
+            case 'Escape':
+                this.hideSuggestions();
+                break;
+        }
+    }
+    
+    highlightSuggestion(suggestions) {
+        suggestions.forEach((suggestion, index) => {
+            suggestion.classList.toggle('highlighted', index === this.selectedSuggestionIndex);
+        });
+    }
+    
+    handleFormSubmit(e) {
+        // Show loading state
+        const submitButton = document.getElementById('ultraSearchBtn');
+        if (submitButton) {
+            const btnContent = submitButton.querySelector('.btn-content');
+            const btnLoading = submitButton.querySelector('.btn-loading');
+            
+            if (btnContent && btnLoading) {
+                btnContent.classList.add('d-none');
+                btnLoading.classList.remove('d-none');
+            }
+        }
+        
+        // Let form submit normally
+        return true;
+    }
+    
+    handleQuickFilter(e) {
+        const filterType = e.currentTarget.dataset.filter;
+        
+        // Update search query with filter
+        if (this.searchInput) {
+            this.searchInput.value = filterType + ' travel experience';
+        }
+        
+        // Auto-fill smart filters
+        const vibeFilter = document.getElementById('vibeFilter');
+        if (vibeFilter) {
+            vibeFilter.value = filterType;
+        }
+        
+        // Submit form
+        setTimeout(() => {
+            this.searchForm.submit();
+        }, 100);
+    }
+}
+
+// Voice Search Functionality
+class VoiceSearch {
+    constructor() {
+        this.recognition = null;
+        this.isListening = false;
+        this.voiceButton = document.getElementById('voiceSearchBtn');
+        
+        this.initializeVoiceSearch();
+    }
+    
+    initializeVoiceSearch() {
+        if ('webkitSpeechRecognition' in window) {
+            this.recognition = new webkitSpeechRecognition();
+            this.recognition.continuous = false;
+            this.recognition.interimResults = false;
+            this.recognition.lang = 'en-US';
+            
+            this.recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                this.handleVoiceResult(transcript);
+            };
+            
+            this.recognition.onerror = (event) => {
+                console.error('Speech recognition error:', event.error);
+                this.stopListening();
+            };
+            
+            this.recognition.onend = () => {
+                this.stopListening();
+            };
+        } else {
+            // Hide voice search button if not supported
+            if (this.voiceButton) {
+                this.voiceButton.style.display = 'none';
+            }
+        }
+        
+        if (this.voiceButton) {
+            this.voiceButton.addEventListener('click', () => this.toggleVoiceSearch());
+        }
+    }
+    
+    toggleVoiceSearch() {
+        if (this.isListening) {
+            this.stopListening();
+        } else {
+            this.startListening();
+        }
+    }
+    
+    startListening() {
+        if (!this.recognition) return;
+        
+        this.isListening = true;
+        this.voiceButton.classList.add('listening');
+        this.voiceButton.innerHTML = '<i class="fas fa-microphone-slash"></i>';
+        
+        this.recognition.start();
+    }
+    
+    stopListening() {
+        this.isListening = false;
+        if (this.voiceButton) {
+            this.voiceButton.classList.remove('listening');
+            this.voiceButton.innerHTML = '<i class="fas fa-microphone"></i>';
+        }
+        
+        if (this.recognition) {
+            this.recognition.stop();
+        }
+    }
+    
+    handleVoiceResult(transcript) {
+        const searchInput = document.getElementById('aiDestination');
+        if (searchInput) {
+            searchInput.value = transcript;
+            searchInput.dispatchEvent(new Event('input'));
+        }
+    }
+}
+
+// Trending tags functionality
+function setDestination(destination) {
+    const searchInput = document.getElementById('aiDestination');
+    if (searchInput) {
+        searchInput.value = destination;
+        searchInput.dispatchEvent(new Event('input'));
+    }
+}
+
+function setQuickFilter(filterType) {
+    const searchInput = document.getElementById('aiDestination');
+    if (searchInput) {
+        searchInput.value = filterType + ' travel experience';
+        searchInput.dispatchEvent(new Event('input'));
+    }
+    
+    // Auto-fill related filters
+    const vibeFilter = document.getElementById('vibeFilter');
+    if (vibeFilter) {
+        vibeFilter.value = filterType;
+    }
+    
+    // Submit form
+    setTimeout(() => {
+        document.getElementById('modernSearchForm').submit();
+    }, 100);
+}
+
+// Counter animation for statistics
+function animateCounters() {
+    const counters = document.querySelectorAll('[data-counter]');
+    
+    const observerOptions = {
+        threshold: 0.5,
+        rootMargin: '0px'
+    };
+    
+    const counterObserver = new IntersectionObserver(function(entries) {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const counter = entry.target;
+                const target = parseInt(counter.dataset.counter);
+                const duration = 2000;
+                const start = performance.now();
+                
+                const animate = (currentTime) => {
+                    const elapsed = currentTime - start;
+                    const progress = Math.min(elapsed / duration, 1);
+                    
+                    const current = Math.floor(progress * target);
+                    counter.textContent = current.toLocaleString();
+                    
+                    if (progress < 1) {
+                        requestAnimationFrame(animate);
+                    }
+                };
+                
+                requestAnimationFrame(animate);
+                counterObserver.unobserve(counter);
+            }
+        });
+    }, observerOptions);
+    
+    counters.forEach(counter => {
+        counterObserver.observe(counter);
+    });
+}
+
+// Initialize everything when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize search manager
+    const searchManager = new SearchManager();
+    
+    // Initialize voice search
+    const voiceSearch = new VoiceSearch();
+    
+    // Initialize counter animation
+    animateCounters();
+    
+    // Initialize travelers/budget controls
+    initializeTravelersControls();
+    initializeBudgetControls();
+    
+    // Initialize date validation
+    initializeDateValidation();
 });
 
-// Travelers counter
+// Travelers counter functions
 function changeTravelers(type, change) {
     const input = document.getElementById(type);
-    const currentValue = parseInt(input.value);
-    const newValue = Math.max(type === 'adults' ? 1 : 0, currentValue + change);
-    const maxValue = type === 'adults' ? 20 : 10;
-    
-    if (newValue <= maxValue) {
+    if (input) {
+        const currentValue = parseInt(input.value) || 0;
+        const newValue = Math.max(type === 'adults' ? 1 : 0, currentValue + change);
         input.value = newValue;
         updateTravelersDisplay();
     }
 }
 
 function updateTravelersDisplay() {
-    const adults = parseInt(document.getElementById('adults').value);
-    const children = parseInt(document.getElementById('children').value);
+    const adults = parseInt(document.getElementById('adults')?.value) || 2;
+    const children = parseInt(document.getElementById('children')?.value) || 0;
+    const minPrice = parseInt(document.getElementById('min_price')?.value) || 100;
+    const maxPrice = parseInt(document.getElementById('max_price')?.value) || 1000;
     
-    let text = adults + ' Adult' + (adults > 1 ? 's' : '');
-    if (children > 0) {
-        text += ', ' + children + ' Child' + (children > 1 ? 'ren' : '');
+    const displayText = `${adults} Adult${adults > 1 ? 's' : ''}${children > 0 ? ` • ${children} Child${children > 1 ? 'ren' : ''}` : ''} • $${minPrice}-$${maxPrice}`;
+    
+    const display = document.getElementById('travelersBudgetText');
+    if (display) {
+        display.textContent = displayText;
     }
+}
+
+// Budget functions
+function setBudgetPreset(min, max) {
+    const minInput = document.getElementById('min_price');
+    const maxInput = document.getElementById('max_price');
+    const slider = document.getElementById('budgetRange');
     
-    document.getElementById('travelersText').textContent = text;
+    if (minInput) minInput.value = min;
+    if (maxInput) maxInput.value = max;
+    if (slider) slider.value = max;
+    
+    updateTravelersDisplay();
 }
 
-// Budget slider
-function updateBudgetDisplay() {
-    const budget = document.getElementById('budgetRange').value;
-    const formatted = new Intl.NumberFormat('en-LK').format(budget);
-    document.getElementById('budgetDisplay').textContent = 'LKR ' + formatted;
-    document.getElementById('max_price').value = budget;
+function initializeTravelersControls() {
+    // Initialize display
+    updateTravelersDisplay();
 }
 
-// Date validation
-document.getElementById('start_date').addEventListener('change', function() {
-    const startDate = this.value;
+function initializeBudgetControls() {
+    const budgetSlider = document.getElementById('budgetRange');
+    const maxPriceInput = document.getElementById('max_price');
+    
+    if (budgetSlider && maxPriceInput) {
+        budgetSlider.addEventListener('input', function() {
+            maxPriceInput.value = this.value;
+            updateTravelersDisplay();
+        });
+        
+        maxPriceInput.addEventListener('input', function() {
+            budgetSlider.value = this.value;
+            updateTravelersDisplay();
+        });
+    }
+}
+
+function initializeDateValidation() {
+    const startDateInput = document.getElementById('start_date');
     const endDateInput = document.getElementById('end_date');
-    endDateInput.min = startDate;
     
-    if (endDateInput.value && endDateInput.value < startDate) {
-        endDateInput.value = startDate;
+    if (startDateInput && endDateInput) {
+        startDateInput.addEventListener('change', function() {
+            endDateInput.min = this.value;
+            if (endDateInput.value && endDateInput.value < this.value) {
+                endDateInput.value = this.value;
+            }
+        });
     }
-});
-
-// Form submission enhancement
-document.getElementById('searchForm').addEventListener('submit', function(e) {
-    const destination = document.getElementById('destination').value;
-    
-    // Add destination to search query if provided
-    if (destination) {
-        const hiddenInput = document.createElement('input');
-        hiddenInput.type = 'hidden';
-        hiddenInput.name = 'search';
-        hiddenInput.value = destination;
-        this.appendChild(hiddenInput);
-    }
-});
-
-// Initialize displays
-updateTravelersDisplay();
-updateBudgetDisplay();
+}
 </script>
-
-<style>
-/* ...existing code... */
-
-.suggestion-item {
-    transition: background-color 0.2s ease;
-    cursor: pointer;
-}
-
-.suggestion-item:last-child {
-    border-bottom: none !important;
-}
-
-.suggestion-item.selected {
-    background-color: #e3f2fd !important;
-}
-
-#destinationSuggestions {
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    border: 1px solid #dee2e6;
-}
-
-/* ...existing code... */
-</style>
 {% endblock %}

@@ -3,85 +3,403 @@
 {% block title %}Destinations - Travel Management System{% endblock %}
 
 {% block content %}
-<div class="container my-5">
-    <div class="row">
-        <div class="col-md-3">
-            <div class="card">
-                <div class="card-header">
-                    <h5>Filter Destinations</h5>
-                </div>
-                <div class="card-body">
-                    <form method="get">
-                        <div class="mb-3">
-                            <label for="search" class="form-label">Search</label>
-                            <input type="text" class="form-control" id="search" name="search" value="{{ search_query }}" placeholder="Search destinations...">
-                        </div>
-                        <div class="mb-3">
-                            <label for="country" class="form-label">Country</label>
-                            <input type="text" class="form-control" id="country" name="country" value="{{ selected_country }}" placeholder="Filter by country">
-                        </div>
-                        <button type="submit" class="btn btn-success w-100 mt-3">Filter</button>
-                        <a href="{% url 'destinations' %}" class="btn btn-secondary w-100 mt-2">Clear Filters</a>
-                    </form>
+<style>
+    .hero-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 100px 0;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .hero-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 100" fill="white" opacity="0.1"><polygon points="0,0 1000,100 1000,0"/></svg>');
+        background-size: cover;
+    }
+    
+    .hero-content {
+        position: relative;
+        z-index: 2;
+    }
+    
+    .filter-sidebar {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        padding: 30px;
+        position: sticky;
+        top: 100px;
+        margin-top: -80px;
+        z-index: 1000;
+    }
+    
+    .destination-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        overflow: hidden;
+        border: none;
+        height: 100%;
+    }
+    
+    .destination-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    }
+    
+    .destination-card .card-img-top {
+        height: 250px;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+    
+    .destination-card:hover .card-img-top {
+        transform: scale(1.05);
+    }
+    
+    .destination-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 25px;
+        font-size: 12px;
+        font-weight: 600;
+        box-shadow: 0 4px 15px rgba(238, 90, 36, 0.3);
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+    
+    .destination-card .card-body {
+        padding: 25px;
+    }
+    
+    .destination-card .card-title {
+        color: #2c3e50;
+        font-weight: 700;
+        margin-bottom: 15px;
+    }
+    
+    .location-info {
+        display: flex;
+        align-items: center;
+        color: #7f8c8d;
+        margin-bottom: 15px;
+    }
+    
+    .location-info i {
+        margin-right: 8px;
+        color: #3498db;
+    }
+    
+    .explore-btn {
+        background: linear-gradient(45deg, #3498db, #2980b9);
+        border: none;
+        color: white;
+        padding: 12px 30px;
+        border-radius: 25px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        width: 100%;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .explore-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+    }
+    
+    .explore-btn:hover::before {
+        left: 100%;
+    }
+    
+    .explore-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(52, 152, 219, 0.3);
+    }
+    
+    .search-input {
+        border-radius: 15px;
+        padding: 12px 20px;
+        border: 2px solid #ecf0f1;
+        transition: all 0.3s ease;
+        background: white;
+    }
+    
+    .search-input:focus {
+        border-color: #3498db;
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        outline: none;
+    }
+    
+    .filter-btn {
+        background: linear-gradient(45deg, #27ae60, #219a52);
+        border: none;
+        color: white;
+        padding: 12px 30px;
+        border-radius: 25px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+    
+    .filter-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(39, 174, 96, 0.3);
+    }
+    
+    .clear-btn {
+        background: #95a5a6;
+        border: none;
+        color: white;
+        padding: 12px 30px;
+        border-radius: 25px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+    
+    .clear-btn:hover {
+        background: #7f8c8d;
+        transform: translateY(-2px);
+    }
+    
+    .results-header {
+        background: white;
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        margin-bottom: 30px;
+    }
+    
+    .results-count {
+        color: #3498db;
+        font-weight: 600;
+    }
+    
+    .no-results {
+        text-align: center;
+        padding: 60px 30px;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+    
+    .no-results i {
+        font-size: 4rem;
+        color: #bdc3c7;
+        margin-bottom: 20px;
+    }
+    
+    .pagination-modern {
+        display: flex;
+        justify-content: center;
+        margin-top: 50px;
+    }
+    
+    .pagination-modern .page-link {
+        border: none;
+        padding: 12px 20px;
+        margin: 0 5px;
+        border-radius: 10px;
+        color: #3498db;
+        background: white;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        font-weight: 600;
+    }
+    
+    .pagination-modern .page-link:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(52, 152, 219, 0.2);
+        color: #2980b9;
+    }
+    
+    .pagination-modern .page-item.active .page-link {
+        background: linear-gradient(45deg, #3498db, #2980b9);
+        color: white;
+        box-shadow: 0 8px 25px rgba(52, 152, 219, 0.3);
+    }
+    
+    .filter-section-title {
+        color: #2c3e50;
+        font-weight: 700;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+    
+    .filter-section-title i {
+        margin-right: 10px;
+        color: #3498db;
+    }
+    
+    .fade-in {
+        animation: fadeIn 0.5s ease-in;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @media (max-width: 768px) {
+        .hero-section {
+            padding: 60px 0;
+        }
+        
+        .filter-sidebar {
+            margin-top: 20px;
+            position: relative;
+            top: 0;
+        }
+        
+        .destination-card {
+            margin-bottom: 20px;
+        }
+    }
+</style>
+
+<!-- Hero Section -->
+<div class="hero-section">
+    <div class="container">
+        <div class="hero-content text-center">
+            <h1 class="display-4 fw-bold mb-4">
+                <i class="fas fa-map-marked-alt me-3"></i>
+                Explore Amazing Destinations
+            </h1>
+            <p class="lead mb-4">Discover breathtaking places and create unforgettable memories</p>
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <div class="search-hero">
+                        <input type="text" id="hero-search" class="form-control form-control-lg" placeholder="Where do you want to go?" style="border-radius: 50px; padding: 20px 30px;">
+                    </div>
                 </div>
             </div>
         </div>
+    </div>
+</div>
+
+<div class="container my-5">
+    <div class="row">
+        <div class="col-lg-3 col-md-4">
+            <div class="filter-sidebar">
+                <h5 class="filter-section-title">
+                    <i class="fas fa-filter"></i>
+                    Filter Destinations
+                </h5>
+                <form method="get" id="filter-form">
+                    <div class="mb-3">
+                        <label for="search" class="form-label">
+                            <i class="fas fa-search me-2"></i>Search
+                        </label>
+                        <input type="text" class="form-control search-input" id="search" name="search" value="{{ search_query }}" placeholder="Search destinations...">
+                    </div>
+                    <div class="mb-3">
+                        <label for="country" class="form-label">
+                            <i class="fas fa-globe me-2"></i>Country
+                        </label>
+                        <input type="text" class="form-control search-input" id="country" name="country" value="{{ selected_country }}" placeholder="Filter by country">
+                    </div>
+                    <button type="submit" class="btn filter-btn mt-3">
+                        <i class="fas fa-search me-2"></i>Filter
+                    </button>
+                    <a href="{% url 'destinations' %}" class="btn clear-btn mt-2">
+                        <i class="fas fa-times me-2"></i>Clear Filters
+                    </a>
+                </form>
+            </div>
+        </div>
         
-        <div class="col-md-9">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2>Explore Amazing Destinations</h2>
-                <p class="text-muted">{{ page_obj.paginator.count }} destinations found</p>
+        <div class="col-lg-9 col-md-8">
+            <div class="results-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h2 class="mb-0">
+                        <i class="fas fa-map-marker-alt me-2 text-primary"></i>
+                        Destinations
+                    </h2>
+                    <span class="results-count">
+                        <i class="fas fa-map-pin me-2"></i>
+                        {{ page_obj.paginator.count }} destinations found
+                    </span>
+                </div>
             </div>
             
-            <div class="row">
+            <div class="row" id="destinations-grid">
                 {% for destination in page_obj %}
-                    <div class="col-md-4 col-sm-6 mb-4">
-                        <div class="card h-100">
+                    <div class="col-lg-4 col-md-6 mb-4 fade-in">
+                        <div class="destination-card">
                             {% if destination.is_popular %}
-                                <div class="position-relative">
-                                    <span class="badge bg-success position-absolute top-0 end-0 m-2">
-                                        <i class="fas fa-fire"></i> Popular
-                                    </span>
+                                <div class="destination-badge">
+                                    <i class="fas fa-fire"></i> Popular
                                 </div>
                             {% endif %}
                             {% if destination.image %}
-                                <img src="{{ destination.image.url }}" class="card-img-top" alt="{{ destination.name }}" style="height: 200px; object-fit: cover;">
+                                <img src="{{ destination.image.url }}" class="card-img-top" alt="{{ destination.name }}">
                             {% else %}
-                                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
-                                    <i class="fas fa-map-marker-alt fa-3x text-muted"></i>
+                                <div class="card-img-top bg-gradient d-flex align-items-center justify-content-center" style="height: 250px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                                    <i class="fas fa-map-marker-alt fa-4x text-white opacity-50"></i>
                                 </div>
                             {% endif %}
                             <div class="card-body">
                                 <h5 class="card-title">{{ destination.name }}</h5>
-                                <p class="card-text">
-                                    <i class="fas fa-map-marker-alt text-primary"></i> 
+                                <div class="location-info">
+                                    <i class="fas fa-map-marker-alt"></i>
                                     {{ destination.city }}, {{ destination.country }}
-                                </p>
-                                <p class="card-text">{{ destination.description|truncatewords:20 }}</p>
-                            </div>
-                            <div class="card-footer">
-                                <a href="{% url 'destination_detail' destination.id %}" class="btn btn-success w-100">
-                                    Explore Packages
-                                </a>
+                                </div>
+                                <p class="card-text text-muted">{{ destination.description|truncatewords:20 }}</p>
+                                <div class="mt-auto">
+                                    <a href="{% url 'destination_detail' destination.id %}" class="btn explore-btn">
+                                        <i class="fas fa-compass me-2"></i>Explore Packages
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>
                 {% empty %}
                     <div class="col-12">
-                        <div class="alert alert-info">
+                        <div class="no-results">
+                            <i class="fas fa-map-marked-alt"></i>
                             <h4>No destinations found</h4>
-                            <p>No destinations match your search criteria. <a href="{% url 'destinations' %}">Clear filters</a> to see all destinations.</p>
+                            <p class="text-muted">No destinations match your search criteria.</p>
+                            <a href="{% url 'destinations' %}" class="btn btn-primary">
+                                <i class="fas fa-refresh me-2"></i>Clear filters
+                            </a>
                         </div>
                     </div>
                 {% endfor %}
             </div>
             
             {% if page_obj.has_other_pages %}
-                <nav aria-label="Page navigation">
-                    <ul class="pagination justify-content-center">
+                <nav aria-label="Page navigation" class="pagination-modern">
+                    <ul class="pagination">
                         {% if page_obj.has_previous %}
                             <li class="page-item">
-                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_country %}&country={{ selected_country }}{% endif %}">Previous</a>
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_country %}&country={{ selected_country }}{% endif %}">
+                                    <i class="fas fa-chevron-left me-2"></i>Previous
+                                </a>
                             </li>
                         {% endif %}
                         
@@ -99,7 +417,9 @@
                         
                         {% if page_obj.has_next %}
                             <li class="page-item">
-                                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_country %}&country={{ selected_country }}{% endif %}">Next</a>
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_country %}&country={{ selected_country }}{% endif %}">
+                                    Next<i class="fas fa-chevron-right ms-2"></i>
+                                </a>
                             </li>
                         {% endif %}
                     </ul>
@@ -108,4 +428,52 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Real-time search functionality
+    const searchInput = document.getElementById('search');
+    const heroSearch = document.getElementById('hero-search');
+    const form = document.getElementById('filter-form');
+    
+    // Sync hero search with filter search
+    heroSearch.addEventListener('input', function() {
+        searchInput.value = this.value;
+    });
+    
+    // Auto-submit form on search input (with debounce)
+    let searchTimeout;
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            form.submit();
+        }, 500);
+    });
+    
+    // Animate cards on scroll
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+    
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('fade-in');
+            }
+        });
+    }, observerOptions);
+    
+    document.querySelectorAll('.destination-card').forEach(card => {
+        observer.observe(card);
+    });
+    
+    // Add loading state to buttons
+    document.querySelectorAll('.explore-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Loading...';
+        });
+    });
+});
+</script>
 {% endblock %}

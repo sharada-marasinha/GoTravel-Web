@@ -11,6 +11,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 from .models import Package, Destination, Hotel, Transport, Booking, Review, UserProfile
 from .forms import BookingForm, ReviewForm, UserProfileForm, CustomUserCreationForm
+from .search import TravelSearchEngine, highlight_search_terms, extract_keywords
 import json
 
 def home(request):
@@ -613,29 +614,586 @@ def transport_detail(request, transport_id):
     }
     return HttpResponse(template.render(context, request))
 
-def destination_suggestions(request):
-    """API endpoint for destination auto-suggestions"""
-    query = request.GET.get('q', '').strip()
-    suggestions = []
+# Enhanced search functionality
+def advanced_search(request):
+    """Advanced search with unified results for packages, hotels, destinations, and transports"""
+    search_engine = TravelSearchEngine()
     
-    if len(query) >= 2:  # Start suggesting after 2 characters
+    # Get search parameters
+    search_query = request.GET.get('search', '') or request.GET.get('destination', '')
+    search_type = request.GET.get('type', 'packages')
+    
+    # Prepare filters
+    filters = {
+        'destination': request.GET.get('destination', ''),
+        'package_type': request.GET.get('package_type', ''),
+        'min_price': request.GET.get('min_price', ''),
+        'max_price': request.GET.get('max_price', ''),
+        'duration_days': request.GET.get('duration', ''),
+        'adults': request.GET.get('adults', '2'),
+        'children': request.GET.get('children', '0'),
+        'star_rating': request.GET.get('star_rating', ''),
+        'transport_type': request.GET.get('transport_type', ''),
+        'from_destination': request.GET.get('from_destination', ''),
+        'to_destination': request.GET.get('to_destination', ''),
+        'start_date': request.GET.get('start_date', ''),
+        'end_date': request.GET.get('end_date', ''),
+        'sort_by': request.GET.get('sort', 'relevance')
+    }
+    
+    # Calculate total travelers for capacity filtering
+    try:
+        total_travelers = int(filters['adults']) + int(filters['children'])
+        filters['max_people'] = total_travelers
+    except (ValueError, TypeError):
+        pass
+    
+    # Search packages (main focus)
+    try:
+        packages = search_engine.search_packages(search_query, filters)
+        
+        # Apply sorting
+        sort_by = filters['sort_by']
+        if sort_by == 'price_low':
+            packages = packages.order_by('price', '-relevance_score')
+        elif sort_by == 'price_high':
+            packages = packages.order_by('-price', '-relevance_score')
+        elif sort_by == 'rating':
+            packages = packages.annotate(avg_rating=Avg('review__rating')).order_by('-avg_rating', '-relevance_score')
+        elif sort_by == 'duration':
+            packages = packages.order_by('duration_days', '-relevance_score')
+        elif sort_by == 'name':
+            packages = packages.order_by('name')
+        # Default is relevance (already applied)
+        
+        # For future implementation: Search other types
+        # hotels = search_engine.search_hotels(search_query, filters)
+        # destinations = search_engine.search_destinations(search_query, filters)  
+        # transports = search_engine.search_transports(search_query, filters)
+        
+        # Pagination for packages
+        paginator = Paginator(packages, 12)
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+        
+        # Get additional context
+        destinations = Destination.objects.filter(is_active=True)
+        search_suggestions = search_engine.get_search_suggestions(search_query) if search_query else []
+        
+        # Extract keywords for highlighting
+        search_keywords = search_engine.clean_search_query(search_query)
+        
+        template = loader.get_template('travel/advanced_search.html')
+        context = {
+            'page_obj': page_obj,
+            'destinations': destinations,
+            'search_query': search_query,
+            'search_type': search_type,
+            'filters': filters,
+            'search_suggestions': search_suggestions,
+            'search_keywords': search_keywords,
+            'total_results': packages.count(),
+            # Future unified results
+            # 'hotels': hotels,
+            # 'destinations_results': destinations_results,
+            # 'transports': transports,
+        }
+        return HttpResponse(template.render(context, request))
+    
+    except Exception as e:
+        # Fallback to basic search if search engine fails
         try:
-            destinations = Destination.objects.filter(
-                Q(name__icontains=query) |
-                Q(city__icontains=query) |
-                Q(country__icontains=query),
-                is_active=True
-            ).distinct()[:10]  # Limit to 10 suggestions
+            packages = Package.objects.filter(is_active=True)
             
-            for dest in destinations:
+            if search_query:
+                packages = packages.filter(
+                    Q(name__icontains=search_query) |
+                    Q(description__icontains=search_query) |
+                    Q(destination__name__icontains=search_query) |
+                    Q(destination__city__icontains=search_query) |
+                    Q(destination__country__icontains=search_query)
+                )
+            
+            # Apply basic filters
+            if filters['destination']:
+                packages = packages.filter(
+                    Q(destination__name__icontains=filters['destination']) |
+                    Q(destination__city__icontains=filters['destination']) |
+                    Q(destination__country__icontains=filters['destination'])
+                )
+            
+            if filters['min_price']:
+                try:
+                    packages = packages.filter(price__gte=float(filters['min_price']))
+                except ValueError:
+                    pass
+            
+            if filters['max_price']:
+                try:
+                    packages = packages.filter(price__lte=float(filters['max_price']))
+                except ValueError:
+                    pass
+            
+            if filters['duration_days']:
+                try:
+                    packages = packages.filter(duration_days=int(filters['duration_days']))
+                except ValueError:
+                    pass
+            
+            if filters['package_type']:
+                packages = packages.filter(package_type=filters['package_type'])
+            
+            # Apply sorting
+            sort_by = filters['sort_by']
+            if sort_by == 'price_low':
+                packages = packages.order_by('price')
+            elif sort_by == 'price_high':
+                packages = packages.order_by('-price')
+            elif sort_by == 'rating':
+                packages = packages.annotate(avg_rating=Avg('review__rating')).order_by('-avg_rating')
+            elif sort_by == 'duration':
+                packages = packages.order_by('duration_days')
+            elif sort_by == 'name':
+                packages = packages.order_by('name')
+            else:
+                packages = packages.order_by('-is_featured', '-created_at')
+            
+            # Pagination
+            paginator = Paginator(packages, 12)
+            page_number = request.GET.get('page')
+            page_obj = paginator.get_page(page_number)
+            
+            # Get additional context
+            destinations = Destination.objects.filter(is_active=True)
+            
+            template = loader.get_template('travel/advanced_search.html')
+            context = {
+                'page_obj': page_obj,
+                'destinations': destinations,
+                'search_query': search_query,
+                'search_type': search_type,
+                'filters': filters,
+                'search_suggestions': [],
+                'search_keywords': search_query.split() if search_query else [],
+                'total_results': packages.count(),
+                'error': str(e) if search_query else None,
+            }
+            return HttpResponse(template.render(context, request))
+            
+        except Exception as fallback_error:
+            # Final fallback - empty results
+            template = loader.get_template('travel/advanced_search.html')
+            context = {
+                'page_obj': None,
+                'destinations': [],
+                'search_query': search_query,
+                'search_type': search_type,
+                'filters': filters,
+                'search_suggestions': [],
+                'search_keywords': [],
+                'total_results': 0,
+                'error': f'Search error: {str(fallback_error)}',
+            }
+            return HttpResponse(template.render(context, request))
+            
+            # Apply basic filters
+            if filters.get('destination'):
+                packages = packages.filter(
+                    Q(destination__name__icontains=filters['destination']) |
+                    Q(destination__city__icontains=filters['destination']) |
+                    Q(destination__country__icontains=filters['destination'])
+                )
+            
+            if filters.get('min_price'):
+                try:
+                    packages = packages.filter(price__gte=float(filters['min_price']))
+                except (ValueError, TypeError):
+                    pass
+            
+            if filters.get('max_price'):
+                try:
+                    packages = packages.filter(price__lte=float(filters['max_price']))
+                except (ValueError, TypeError):
+                    pass
+            
+            if filters.get('max_people'):
+                try:
+                    packages = packages.filter(max_people__gte=int(filters['max_people']))
+                except (ValueError, TypeError):
+                    pass
+            
+            packages = packages.order_by('name')
+            
+            # Pagination
+            paginator = Paginator(packages, 12)
+            page_number = request.GET.get('page')
+            page_obj = paginator.get_page(page_number)
+            
+            destinations = Destination.objects.filter(is_active=True)
+            
+            template = loader.get_template('travel/advanced_search.html')
+            context = {
+                'page_obj': page_obj,
+                'destinations': destinations,
+                'search_query': search_query,
+                'search_type': search_type,
+                'filters': filters,
+                'search_suggestions': [],
+                'search_keywords': [],
+                'total_results': packages.count(),
+            }
+            return HttpResponse(template.render(context, request))
+            
+        except Exception as fallback_error:
+            # Ultimate fallback
+            template = loader.get_template('travel/advanced_search.html')
+            context = {
+                'page_obj': None,
+                'destinations': [],
+                'search_query': search_query,
+                'search_type': search_type,
+                'filters': filters,
+                'search_suggestions': [],
+                'search_keywords': [],
+                'total_results': 0,
+                'error': 'Search temporarily unavailable. Please try again later.'
+            }
+            return HttpResponse(template.render(context, request))
+
+
+def keyword_search(request):
+    """Dedicated keyword search endpoint"""
+    search_engine = TravelSearchEngine()
+    
+    query = request.GET.get('q', '')
+    search_type = request.GET.get('type', 'packages')
+    
+    if not query:
+        return JsonResponse({
+            'results': [],
+            'total': 0,
+            'query': query,
+            'suggestions': search_engine.get_popular_searches()
+        })
+    
+    # Perform search
+    if search_type == 'packages':
+        results = search_engine.search_packages(query)
+        results_data = [{
+            'id': p.id,
+            'name': p.name,
+            'destination': str(p.destination),
+            'price': float(p.price),
+            'duration': p.duration_days,
+            'image': p.image.url if p.image else None,
+            'relevance_score': getattr(p, 'relevance_score', 0)
+        } for p in results[:20]]
+        
+    elif search_type == 'destinations':
+        results = search_engine.search_destinations(query)
+        results_data = [{
+            'id': d.id,
+            'name': d.name,
+            'city': d.city,
+            'country': d.country,
+            'image': d.image.url if d.image else None,
+            'relevance_score': getattr(d, 'relevance_score', 0)
+        } for d in results[:20]]
+        
+    elif search_type == 'hotels':
+        results = search_engine.search_hotels(query)
+        results_data = [{
+            'id': h.id,
+            'name': h.name,
+            'destination': str(h.destination),
+            'star_rating': h.star_rating,
+            'price_per_night': float(h.price_per_night),
+            'image': h.image.url if h.image else None,
+            'relevance_score': getattr(h, 'relevance_score', 0)
+        } for h in results[:20]]
+        
+    elif search_type == 'transports':
+        results = search_engine.search_transports(query)
+        results_data = [{
+            'id': t.id,
+            'name': t.name,
+            'type': t.transport_type,
+            'from_destination': str(t.from_destination),
+            'to_destination': str(t.to_destination),
+            'price': float(t.price),
+            'relevance_score': getattr(t, 'relevance_score', 0)
+        } for t in results[:20]]
+        
+    else:
+        results_data = []
+    
+    # Get search suggestions
+    suggestions = search_engine.get_search_suggestions(query)
+    
+    return JsonResponse({
+        'results': results_data,
+        'total': len(results_data),
+        'query': query,
+        'suggestions': suggestions,
+        'search_type': search_type
+    })
+
+
+def search_autocomplete(request):
+    """Autocomplete endpoint for search suggestions"""
+    search_engine = TravelSearchEngine()
+    
+    query = request.GET.get('q', '')
+    limit = int(request.GET.get('limit', 10))
+    
+    if len(query) < 2:
+        # Return popular searches if query is too short
+        suggestions = search_engine.get_popular_searches(limit)
+    else:
+        suggestions = search_engine.get_search_suggestions(query, limit)
+    
+    return JsonResponse({
+        'suggestions': suggestions,
+        'query': query
+    })
+    
+    # Pagination
+    paginator = Paginator(packages, 12)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    template = loader.get_template('travel/advanced_search.html')
+    context = {
+        'page_obj': page_obj,
+        'destinations': destinations,
+        'search_query': search_query,
+        'destination_query': destination_query,
+        'start_date': start_date,
+        'end_date': end_date,
+        'adults': adults,
+        'children': children,
+        'min_price': min_price,
+        'max_price': max_price,
+        'package_type': package_type,
+        'duration_days': duration_days,
+        'sort_by': sort_by,
+        'total_results': packages.count() if packages else 0,
+    }
+    return HttpResponse(template.render(context, request))
+
+@csrf_exempt
+def destination_suggestions(request):
+    """Enhanced destination suggestions with search integration"""
+    if request.method == 'GET':
+        search_engine = TravelSearchEngine()
+        
+        query = request.GET.get('q', '').lower()
+        limit = int(request.GET.get('limit', 10))
+        
+        if len(query) < 2:
+            # Return popular destinations if query is too short
+            suggestions = []
+            popular_destinations = Destination.objects.filter(
+                is_active=True, 
+                is_popular=True
+            ).order_by('-created_at')[:limit]
+            
+            for dest in popular_destinations:
                 suggestions.append({
                     'id': dest.id,
                     'name': dest.name,
                     'city': dest.city,
                     'country': dest.country,
-                    'display': f"{dest.name}, {dest.city}, {dest.country}"
+                    'full_name': f"{dest.name}, {dest.city}, {dest.country}",
+                    'image_url': dest.image.url if dest.image else None,
+                    'type': 'destination',
+                    'packages_count': dest.package_set.filter(is_active=True).count()
                 })
-        except:
-            pass
+        else:
+            # Use search engine for intelligent suggestions
+            suggestions = search_engine.get_search_suggestions(query, limit)
+            
+            # Convert to expected format
+            formatted_suggestions = []
+            for suggestion in suggestions:
+                if suggestion['type'] == 'destination':
+                    try:
+                        dest_id = int(suggestion.get('destination', '').split(',')[0])
+                        dest = Destination.objects.get(id=dest_id)
+                        formatted_suggestions.append({
+                            'id': dest.id,
+                            'name': dest.name,
+                            'city': dest.city,
+                            'country': dest.country,
+                            'full_name': suggestion['text'],
+                            'image_url': dest.image.url if dest.image else None,
+                            'type': 'destination',
+                            'packages_count': suggestion.get('packages_count', 0)
+                        })
+                    except (ValueError, Destination.DoesNotExist):
+                        continue
+                else:
+                    formatted_suggestions.append(suggestion)
+            
+            suggestions = formatted_suggestions
+        
+        return JsonResponse({'suggestions': suggestions})
     
-    return JsonResponse({'suggestions': suggestions})
+    return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+def package_search_api(request):
+    """Enhanced package search API with keyword matching"""
+    search_engine = TravelSearchEngine()
+    
+    query = request.GET.get('search', '') or request.GET.get('q', '')
+    filters = {
+        'destination': request.GET.get('destination', ''),
+        'package_type': request.GET.get('type', ''),
+        'min_price': request.GET.get('min_price', ''),
+        'max_price': request.GET.get('max_price', ''),
+        'duration_days': request.GET.get('duration', ''),
+        'max_people': request.GET.get('max_people', ''),
+    }
+    
+    # Remove empty filters
+    filters = {k: v for k, v in filters.items() if v}
+    
+    try:
+        # Perform search
+        packages = search_engine.search_packages(query, filters)
+        
+        # Limit results for API
+        packages = packages[:20]
+        
+        # Prepare response data
+        results = []
+        for package in packages:
+            results.append({
+                'id': package.id,
+                'name': package.name,
+                'destination': {
+                    'id': package.destination.id,
+                    'name': package.destination.name,
+                    'city': package.destination.city,
+                    'country': package.destination.country,
+                    'full_name': str(package.destination)
+                },
+                'price': float(package.price),
+                'duration_days': package.duration_days,
+                'max_people': package.max_people,
+                'package_type': package.package_type,
+                'package_type_display': package.get_package_type_display(),
+                'image_url': package.image.url if package.image else None,
+                'description': package.description[:200] + '...' if len(package.description) > 200 else package.description,
+                'relevance_score': getattr(package, 'relevance_score', 0),
+                'average_rating': package.average_rating(),
+                'is_featured': package.is_featured
+            })
+        
+        return JsonResponse({
+            'results': results,
+            'total': packages.count(),
+            'query': query,
+            'filters': filters,
+            'has_more': packages.count() > 20
+        })
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+def search_autocomplete(request):
+    """Autocomplete endpoint for search suggestions"""
+    search_engine = TravelSearchEngine()
+    
+    query = request.GET.get('q', '')
+    limit = int(request.GET.get('limit', 10))
+    
+    if len(query) < 2:
+        # Return popular searches if query is too short
+        suggestions = search_engine.get_popular_searches(limit)
+    else:
+        suggestions = search_engine.get_search_suggestions(query, limit)
+    
+    return JsonResponse({
+        'suggestions': suggestions,
+        'query': query
+    })
+
+def keyword_search(request):
+    """Dedicated keyword search endpoint"""
+    search_engine = TravelSearchEngine()
+    
+    query = request.GET.get('q', '')
+    search_type = request.GET.get('type', 'packages')
+    
+    if not query:
+        return JsonResponse({
+            'results': [],
+            'total': 0,
+            'query': query,
+            'suggestions': search_engine.get_popular_searches()
+        })
+    
+    try:
+        # Perform search based on type
+        if search_type == 'packages':
+            results = search_engine.search_packages(query)
+            results_data = [{
+                'id': p.id,
+                'name': p.name,
+                'destination': str(p.destination),
+                'price': float(p.price),
+                'duration': p.duration_days,
+                'image_url': p.image.url if p.image else None,
+                'relevance_score': getattr(p, 'relevance_score', 0)
+            } for p in results[:20]]
+            
+        elif search_type == 'destinations':
+            results = search_engine.search_destinations(query)
+            results_data = [{
+                'id': d.id,
+                'name': d.name,
+                'city': d.city,
+                'country': d.country,
+                'image_url': d.image.url if d.image else None,
+                'relevance_score': getattr(d, 'relevance_score', 0)
+            } for d in results[:20]]
+            
+        elif search_type == 'hotels':
+            results = search_engine.search_hotels(query)
+            results_data = [{
+                'id': h.id,
+                'name': h.name,
+                'destination': str(h.destination),
+                'star_rating': h.star_rating,
+                'price_per_night': float(h.price_per_night),
+                'image_url': h.image.url if h.image else None,
+                'relevance_score': getattr(h, 'relevance_score', 0)
+            } for h in results[:20]]
+            
+        elif search_type == 'transports':
+            results = search_engine.search_transports(query)
+            results_data = [{
+                'id': t.id,
+                'name': t.name,
+                'type': t.transport_type,
+                'from_destination': str(t.from_destination),
+                'to_destination': str(t.to_destination),
+                'price': float(t.price),
+                'relevance_score': getattr(t, 'relevance_score', 0)
+            } for t in results[:20]]
+            
+        else:
+            results_data = []
+        
+        # Get search suggestions
+        suggestions = search_engine.get_search_suggestions(query)
+        
+        return JsonResponse({
+            'results': results_data,
+            'total': len(results_data),
+            'query': query,
+            'suggestions': suggestions,
+            'search_type': search_type
+        })
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)

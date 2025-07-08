@@ -8,6 +8,7 @@ urlpatterns = [
     path('packages/<int:package_id>/', views.package_detail, name='package_detail'),
     path('packages/<int:package_id>/book/', views.book_package, name='book_package'),
     path('packages/<int:package_id>/review/', views.write_review, name='write_review'),
+    path('search/', views.advanced_search, name='advanced_search'),
     path('destinations/', views.destinations, name='destinations'),
     path('destinations/<int:destination_id>/', views.destination_detail, name='destination_detail'),
     path('hotels/', views.hotels, name='hotels'),
@@ -23,5 +24,10 @@ urlpatterns = [
     path('register/', views.register, name='register'),
     path('login/', auth_views.LoginView.as_view(template_name='travel/login.html'), name='login'),
     path('logout/', views.logout_view, name='logout'),
+    
+    # Enhanced Search API Endpoints
     path('api/destinations/', views.destination_suggestions, name='destination_suggestions'),
+    path('api/packages/search/', views.package_search_api, name='package_search_api'),
+    path('api/search/autocomplete/', views.search_autocomplete, name='search_autocomplete'),
+    path('api/search/keyword/', views.keyword_search, name='keyword_search'),
 ]

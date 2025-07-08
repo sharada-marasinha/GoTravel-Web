@@ -1,0 +1,610 @@
+{% extends 'travel/base.html' %}
+{% load static %}
+
+{% block title %}Search Results - Travel World{% endblock %}
+
+{% block extra_css %}
+<style>
+    .search-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+    }
+    
+    .search-tabs {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        padding: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .search-tab {
+        background: transparent;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        margin-right: 0.5rem;
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+    
+    .search-tab.active {
+        background: #667eea;
+        color: white;
+    }
+    
+    .search-tab:hover {
+        background: #f8f9fa;
+    }
+    
+    .search-tab.active:hover {
+        background: #667eea;
+    }
+    
+    .tab-badge {
+        background: #28a745;
+        color: white;
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 12px;
+        margin-left: 0.5rem;
+    }
+    
+    .result-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .result-card {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .result-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+    }
+    
+    .result-image {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+    }
+    
+    .result-content {
+        padding: 1.5rem;
+    }
+    
+    .result-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: #2d3748;
+    }
+    
+    .result-subtitle {
+        color: #667eea;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+    }
+    
+    .result-price {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #28a745;
+        margin-bottom: 1rem;
+    }
+    
+    .result-details {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+    }
+    
+    .result-detail {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        color: #6c757d;
+        font-size: 0.85rem;
+    }
+    
+    .result-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .relevance-badge {
+        background: #e3f2fd;
+        color: #1976d2;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+    
+    .no-results {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #6c757d;
+    }
+    
+    .load-more {
+        text-align: center;
+        margin-top: 2rem;
+    }
+    
+    .search-summary {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+    }
+    
+    .highlight {
+        background: #fff3cd;
+        padding: 0.1rem 0.2rem;
+        border-radius: 2px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="search-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="mb-2">Search Results</h1>
+                <p class="mb-0">
+                    {% if search_query %}
+                        Results for "{{ search_query }}"
+                    {% else %}
+                        Browse our travel options
+                    {% endif %}
+                </p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <a href="{% url 'home' %}" class="btn btn-outline-light">
+                    <i class="fas fa-search me-2"></i>New Search
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Search Summary -->
+    <div class="search-summary">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <strong>{{ total_results }}</strong> total results found
+                {% if search_query %}
+                    for "<strong>{{ search_query }}</strong>"
+                {% endif %}
+            </div>
+            <div class="col-md-4 text-md-end">
+                <small class="text-muted">
+                    Search powered by intelligent keyword matching
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Tabs -->
+    <div class="search-tabs">
+        <div class="d-flex align-items-center flex-wrap">
+            <button class="search-tab active" data-tab="all">
+                <i class="fas fa-th-large me-2"></i>All Results
+                <span class="tab-badge">{{ total_results }}</span>
+            </button>
+            {% if results.packages %}
+                <button class="search-tab" data-tab="packages">
+                    <i class="fas fa-suitcase me-2"></i>Packages
+                    <span class="tab-badge">{{ results.packages.paginator.count }}</span>
+                </button>
+            {% endif %}
+            {% if results.destinations %}
+                <button class="search-tab" data-tab="destinations">
+                    <i class="fas fa-map-marker-alt me-2"></i>Destinations
+                    <span class="tab-badge">{{ results.destinations.paginator.count }}</span>
+                </button>
+            {% endif %}
+            {% if results.hotels %}
+                <button class="search-tab" data-tab="hotels">
+                    <i class="fas fa-bed me-2"></i>Hotels
+                    <span class="tab-badge">{{ results.hotels.paginator.count }}</span>
+                </button>
+            {% endif %}
+            {% if results.transports %}
+                <button class="search-tab" data-tab="transports">
+                    <i class="fas fa-plane me-2"></i>Transports
+                    <span class="tab-badge">{{ results.transports.paginator.count }}</span>
+                </button>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Results Content -->
+    <div id="searchResults">
+        <!-- All Results Tab -->
+        <div class="tab-content active" data-tab="all">
+            {% if results.packages %}
+                <section class="mb-5">
+                    <h3 class="mb-3">
+                        <i class="fas fa-suitcase me-2"></i>Travel Packages
+                        <small class="text-muted">({{ results.packages.paginator.count }} found)</small>
+                    </h3>
+                    <div class="result-grid">
+                        {% for package in results.packages %}
+                            <div class="result-card">
+                                {% if package.image %}
+                                    <img src="{{ package.image.url }}" alt="{{ package.name }}" class="result-image">
+                                {% else %}
+                                    <div class="result-image d-flex align-items-center justify-content-center bg-light">
+                                        <i class="fas fa-image fa-2x text-muted"></i>
+                                    </div>
+                                {% endif %}
+                                <div class="result-content">
+                                    <h4 class="result-title">{{ package.name }}</h4>
+                                    <p class="result-subtitle">
+                                        <i class="fas fa-map-marker-alt me-1"></i>
+                                        {{ package.destination }}
+                                    </p>
+                                    <div class="result-price">
+                                        ${{ package.price }}
+                                        <small class="text-muted">/person</small>
+                                    </div>
+                                    <div class="result-details">
+                                        <div class="result-detail">
+                                            <i class="fas fa-calendar"></i>
+                                            <span>{{ package.duration_days }} days</span>
+                                        </div>
+                                        <div class="result-detail">
+                                            <i class="fas fa-users"></i>
+                                            <span>{{ package.max_people }} max</span>
+                                        </div>
+                                        {% if package.average_rating > 0 %}
+                                            <div class="result-detail">
+                                                <i class="fas fa-star text-warning"></i>
+                                                <span>{{ package.average_rating|floatformat:1 }}</span>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="result-actions">
+                                        <a href="{% url 'package_detail' package.id %}" class="btn btn-primary btn-sm">
+                                            View Details
+                                        </a>
+                                        {% if package.relevance_score %}
+                                            <span class="relevance-badge">
+                                                {{ package.relevance_score }}% match
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    {% if results.packages.has_next %}
+                        <div class="load-more">
+                            <a href="?{{ request.GET.urlencode }}&packages_page={{ results.packages.next_page_number }}" 
+                               class="btn btn-outline-primary">
+                                Load More Packages
+                            </a>
+                        </div>
+                    {% endif %}
+                </section>
+            {% endif %}
+
+            {% if results.destinations %}
+                <section class="mb-5">
+                    <h3 class="mb-3">
+                        <i class="fas fa-map-marker-alt me-2"></i>Destinations
+                        <small class="text-muted">({{ results.destinations.paginator.count }} found)</small>
+                    </h3>
+                    <div class="result-grid">
+                        {% for destination in results.destinations %}
+                            <div class="result-card">
+                                {% if destination.image %}
+                                    <img src="{{ destination.image.url }}" alt="{{ destination.name }}" class="result-image">
+                                {% else %}
+                                    <div class="result-image d-flex align-items-center justify-content-center bg-light">
+                                        <i class="fas fa-image fa-2x text-muted"></i>
+                                    </div>
+                                {% endif %}
+                                <div class="result-content">
+                                    <h4 class="result-title">{{ destination.name }}</h4>
+                                    <p class="result-subtitle">
+                                        <i class="fas fa-globe me-1"></i>
+                                        {{ destination.city }}, {{ destination.country }}
+                                    </p>
+                                    <div class="result-details">
+                                        <div class="result-detail">
+                                            <i class="fas fa-suitcase"></i>
+                                            <span>{{ destination.package_set.count }} packages</span>
+                                        </div>
+                                        {% if destination.is_popular %}
+                                            <div class="result-detail">
+                                                <i class="fas fa-fire text-danger"></i>
+                                                <span>Popular</span>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="result-actions">
+                                        <a href="{% url 'destination_detail' destination.id %}" class="btn btn-primary btn-sm">
+                                            Explore
+                                        </a>
+                                        {% if destination.relevance_score %}
+                                            <span class="relevance-badge">
+                                                {{ destination.relevance_score }}% match
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </section>
+            {% endif %}
+
+            {% if results.hotels %}
+                <section class="mb-5">
+                    <h3 class="mb-3">
+                        <i class="fas fa-bed me-2"></i>Hotels
+                        <small class="text-muted">({{ results.hotels.paginator.count }} found)</small>
+                    </h3>
+                    <div class="result-grid">
+                        {% for hotel in results.hotels %}
+                            <div class="result-card">
+                                {% if hotel.image %}
+                                    <img src="{{ hotel.image.url }}" alt="{{ hotel.name }}" class="result-image">
+                                {% else %}
+                                    <div class="result-image d-flex align-items-center justify-content-center bg-light">
+                                        <i class="fas fa-image fa-2x text-muted"></i>
+                                    </div>
+                                {% endif %}
+                                <div class="result-content">
+                                    <h4 class="result-title">{{ hotel.name }}</h4>
+                                    <p class="result-subtitle">
+                                        <i class="fas fa-map-marker-alt me-1"></i>
+                                        {{ hotel.destination }}
+                                    </p>
+                                    <div class="result-price">
+                                        ${{ hotel.price_per_night }}
+                                        <small class="text-muted">/night</small>
+                                    </div>
+                                    <div class="result-details">
+                                        <div class="result-detail">
+                                            <i class="fas fa-star text-warning"></i>
+                                            <span>{{ hotel.star_rating }} stars</span>
+                                        </div>
+                                    </div>
+                                    <div class="result-actions">
+                                        <a href="{% url 'hotel_detail' hotel.id %}" class="btn btn-primary btn-sm">
+                                            View Hotel
+                                        </a>
+                                        {% if hotel.relevance_score %}
+                                            <span class="relevance-badge">
+                                                {{ hotel.relevance_score }}% match
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </section>
+            {% endif %}
+
+            {% if results.transports %}
+                <section class="mb-5">
+                    <h3 class="mb-3">
+                        <i class="fas fa-plane me-2"></i>Transportation
+                        <small class="text-muted">({{ results.transports.paginator.count }} found)</small>
+                    </h3>
+                    <div class="result-grid">
+                        {% for transport in results.transports %}
+                            <div class="result-card">
+                                {% if transport.image %}
+                                    <img src="{{ transport.image.url }}" alt="{{ transport.name }}" class="result-image">
+                                {% else %}
+                                    <div class="result-image d-flex align-items-center justify-content-center bg-light">
+                                        <i class="fas fa-{{ transport.transport_type }} fa-2x text-muted"></i>
+                                    </div>
+                                {% endif %}
+                                <div class="result-content">
+                                    <h4 class="result-title">{{ transport.name }}</h4>
+                                    <p class="result-subtitle">
+                                        <i class="fas fa-route me-1"></i>
+                                        {{ transport.from_destination }} → {{ transport.to_destination }}
+                                    </p>
+                                    <div class="result-price">
+                                        ${{ transport.price }}
+                                        <small class="text-muted">/person</small>
+                                    </div>
+                                    <div class="result-details">
+                                        <div class="result-detail">
+                                            <i class="fas fa-{{ transport.transport_type }}"></i>
+                                            <span>{{ transport.get_transport_type_display }}</span>
+                                        </div>
+                                        <div class="result-detail">
+                                            <i class="fas fa-clock"></i>
+                                            <span>{{ transport.departure_time }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="result-actions">
+                                        <a href="{% url 'transport_detail' transport.id %}" class="btn btn-primary btn-sm">
+                                            View Details
+                                        </a>
+                                        {% if transport.relevance_score %}
+                                            <span class="relevance-badge">
+                                                {{ transport.relevance_score }}% match
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </section>
+            {% endif %}
+        </div>
+
+        <!-- Individual Tab Contents (hidden by default) -->
+        <div class="tab-content" data-tab="packages">
+            <!-- Packages only content -->
+        </div>
+        <div class="tab-content" data-tab="destinations">
+            <!-- Destinations only content -->
+        </div>
+        <div class="tab-content" data-tab="hotels">
+            <!-- Hotels only content -->
+        </div>
+        <div class="tab-content" data-tab="transports">
+            <!-- Transports only content -->
+        </div>
+    </div>
+
+    <!-- No Results -->
+    {% if total_results == 0 %}
+        <div class="no-results">
+            <i class="fas fa-search fa-4x mb-3"></i>
+            <h3>No results found</h3>
+            <p class="mb-4">
+                {% if search_query %}
+                    We couldn't find any results matching "{{ search_query }}". 
+                {% else %}
+                    No results match your current search criteria. 
+                {% endif %}
+                Try adjusting your search terms or browse our popular destinations.
+            </p>
+            <a href="{% url 'home' %}" class="btn btn-primary">
+                <i class="fas fa-home me-2"></i>Back to Home
+            </a>
+        </div>
+    {% endif %}
+
+    <!-- Search Suggestions -->
+    {% if search_suggestions %}
+        <div class="search-suggestions">
+            <h5 class="mb-3">
+                <i class="fas fa-lightbulb me-2"></i>You might also like:
+            </h5>
+            <div>
+                {% for suggestion in search_suggestions %}
+                    <a href="{% url 'advanced_search' %}?search={{ suggestion.text }}&type=unified" 
+                       class="suggestion-chip">
+                        {{ suggestion.text }}
+                        {% if suggestion.type == 'destination' %}
+                            <small>({{ suggestion.packages_count }} packages)</small>
+                        {% elif suggestion.type == 'package' %}
+                            <small>${{ suggestion.price }}</small>
+                        {% endif %}
+                    </a>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Tab switching functionality
+    const tabs = document.querySelectorAll('.search-tab');
+    const tabContents = document.querySelectorAll('.tab-content');
+    
+    tabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            const targetTab = this.dataset.tab;
+            
+            // Remove active class from all tabs and contents
+            tabs.forEach(t => t.classList.remove('active'));
+            tabContents.forEach(content => content.classList.remove('active'));
+            
+            // Add active class to clicked tab
+            this.classList.add('active');
+            
+            // Show corresponding content
+            const targetContent = document.querySelector(`[data-tab="${targetTab}"]`);
+            if (targetContent) {
+                targetContent.classList.add('active');
+            }
+        });
+    });
+    
+    // Highlight search terms
+    const searchQuery = '{{ search_query }}';
+    if (searchQuery) {
+        highlightSearchTerms(searchQuery);
+    }
+    
+    function highlightSearchTerms(query) {
+        const keywords = query.toLowerCase().split(' ');
+        const textElements = document.querySelectorAll('.result-title, .result-subtitle');
+        
+        textElements.forEach(element => {
+            let html = element.innerHTML;
+            keywords.forEach(keyword => {
+                if (keyword.length > 2) {
+                    const regex = new RegExp(`(${keyword})`, 'gi');
+                    html = html.replace(regex, '<span class="highlight">$1</span>');
+                }
+            });
+            element.innerHTML = html;
+        });
+    }
+    
+    // Infinite scroll for load more functionality
+    const loadMoreButtons = document.querySelectorAll('.load-more a');
+    loadMoreButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            const url = this.href;
+            const section = this.closest('section');
+            const grid = section.querySelector('.result-grid');
+            
+            // Show loading state
+            this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Loading...';
+            
+            fetch(url)
+                .then(response => response.text())
+                .then(html => {
+                    // Parse the response and append new items
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const newItems = doc.querySelectorAll('.result-card');
+                    
+                    newItems.forEach(item => {
+                        grid.appendChild(item);
+                    });
+                    
+                    // Update or remove load more button
+                    const newLoadMore = doc.querySelector('.load-more a');
+                    if (newLoadMore) {
+                        this.href = newLoadMore.href;
+                        this.innerHTML = 'Load More';
+                    } else {
+                        this.closest('.load-more').remove();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading more results:', error);
+                    this.innerHTML = 'Error loading more';
+                });
+        });
+    });
+});
+</script>
+{% endblock %}

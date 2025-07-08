@@ -3,86 +3,522 @@
 {% block title %}My Bookings - Travel Management System{% endblock %}
 
 {% block content %}
-<div class="container my-5">
-    <h2>My Booking History</h2>
+<style>
+    .bookings-hero {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 80px 0;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .bookings-hero::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 100" fill="white" opacity="0.1"><polygon points="0,0 1000,100 1000,0"/></svg>');
+        background-size: cover;
+    }
+    
+    .bookings-hero-content {
+        position: relative;
+        z-index: 2;
+        text-align: center;
+    }
+    
+    .bookings-title {
+        font-size: 3rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        animation: fadeInUp 1s ease-out;
+    }
+    
+    .bookings-subtitle {
+        font-size: 1.3rem;
+        opacity: 0.9;
+        animation: fadeInUp 1s ease-out 0.2s both;
+    }
+    
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .bookings-container {
+        margin-top: -60px;
+        position: relative;
+        z-index: 10;
+    }
+    
+    .booking-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        overflow: hidden;
+        border: none;
+        margin-bottom: 30px;
+        position: relative;
+    }
+    
+    .booking-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+    }
+    
+    .booking-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(45deg, #3498db, #2980b9);
+    }
+    
+    .booking-card-body {
+        padding: 30px;
+    }
+    
+    .booking-header {
+        display: flex;
+        justify-content: between;
+        align-items: flex-start;
+        margin-bottom: 25px;
+    }
+    
+    .booking-info {
+        flex: 1;
+    }
+    
+    .booking-title {
+        color: #2c3e50;
+        font-weight: 700;
+        font-size: 1.4rem;
+        margin-bottom: 15px;
+    }
+    
+    .booking-detail {
+        display: flex;
+        align-items: center;
+        margin-bottom: 8px;
+        color: #7f8c8d;
+    }
+    
+    .booking-detail i {
+        width: 20px;
+        margin-right: 10px;
+        color: #3498db;
+    }
+    
+    .booking-detail strong {
+        color: #2c3e50;
+        margin-left: 5px;
+    }
+    
+    .booking-status {
+        text-align: right;
+        flex-shrink: 0;
+        margin-left: 20px;
+    }
+    
+    .status-badge {
+        padding: 10px 20px;
+        border-radius: 25px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .status-badge.confirmed {
+        background: linear-gradient(45deg, #27ae60, #219a52);
+        color: white;
+    }
+    
+    .status-badge.pending {
+        background: linear-gradient(45deg, #f39c12, #e67e22);
+        color: white;
+    }
+    
+    .status-badge.cancelled {
+        background: linear-gradient(45deg, #e74c3c, #c0392b);
+        color: white;
+    }
+    
+    .booking-actions {
+        display: flex;
+        gap: 15px;
+        margin-top: 25px;
+        padding-top: 25px;
+        border-top: 1px solid #ecf0f1;
+    }
+    
+    .btn-view-details {
+        background: linear-gradient(45deg, #3498db, #2980b9);
+        border: none;
+        color: white;
+        padding: 10px 25px;
+        border-radius: 20px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        font-size: 0.9rem;
+    }
+    
+    .btn-view-details:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(52, 152, 219, 0.3);
+        color: white;
+    }
+    
+    .btn-view-package {
+        background: linear-gradient(45deg, #95a5a6, #7f8c8d);
+        border: none;
+        color: white;
+        padding: 10px 25px;
+        border-radius: 20px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        font-size: 0.9rem;
+    }
+    
+    .btn-view-package:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(149, 165, 166, 0.3);
+        color: white;
+    }
+    
+    .booking-id {
+        position: absolute;
+        top: 15px;
+        right: 20px;
+        background: rgba(52, 152, 219, 0.1);
+        color: #3498db;
+        padding: 5px 12px;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    
+    .no-bookings {
+        text-align: center;
+        padding: 80px 40px;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        margin-top: 50px;
+    }
+    
+    .no-bookings i {
+        font-size: 5rem;
+        color: #bdc3c7;
+        margin-bottom: 30px;
+    }
+    
+    .no-bookings h4 {
+        color: #2c3e50;
+        font-weight: 700;
+        margin-bottom: 15px;
+    }
+    
+    .no-bookings p {
+        color: #7f8c8d;
+        font-size: 1.1rem;
+        margin-bottom: 30px;
+    }
+    
+    .browse-packages-btn {
+        background: linear-gradient(45deg, #27ae60, #219a52);
+        border: none;
+        color: white;
+        padding: 15px 40px;
+        border-radius: 25px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+    }
+    
+    .browse-packages-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 30px rgba(39, 174, 96, 0.3);
+        color: white;
+    }
+    
+    .pagination-modern {
+        display: flex;
+        justify-content: center;
+        margin-top: 50px;
+    }
+    
+    .pagination-modern .page-link {
+        border: none;
+        padding: 12px 20px;
+        margin: 0 5px;
+        border-radius: 15px;
+        color: #3498db;
+        background: white;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        font-weight: 600;
+    }
+    
+    .pagination-modern .page-link:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(52, 152, 219, 0.2);
+        color: #2980b9;
+    }
+    
+    .pagination-modern .page-item.active .page-link {
+        background: linear-gradient(45deg, #3498db, #2980b9);
+        color: white;
+        box-shadow: 0 8px 25px rgba(52, 152, 219, 0.3);
+    }
+    
+    .total-amount {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #27ae60;
+    }
+    
+    .fade-in {
+        animation: fadeIn 0.6s ease-in;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @media (max-width: 768px) {
+        .bookings-hero {
+            padding: 60px 0;
+        }
+        
+        .bookings-container {
+            margin-top: -40px;
+        }
+        
+        .bookings-title {
+            font-size: 2.2rem;
+        }
+        
+        .booking-card-body {
+            padding: 20px;
+        }
+        
+        .booking-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .booking-status {
+            margin-left: 0;
+            margin-top: 15px;
+            text-align: left;
+        }
+        
+        .booking-actions {
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .booking-id {
+            position: static;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+        
+        .no-bookings {
+            padding: 60px 20px;
+        }
+        
+        .no-bookings i {
+            font-size: 3rem;
+        }
+    }
+</style>
 
+<!-- Bookings Hero Section -->
+<div class="bookings-hero">
+    <div class="container">
+        <div class="bookings-hero-content">
+            <h1 class="bookings-title">
+                <i class="fas fa-calendar-check me-3"></i>
+                My Bookings
+            </h1>
+            <p class="bookings-subtitle">Track and manage all your travel bookings</p>
+        </div>
+    </div>
+</div>
+
+<div class="container bookings-container">
     {% if page_obj %}
-    <div class="row">
-        {% for booking in page_obj %}
-        <div class="col-md-6 mb-4">
-            <div class="card">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <h5 class="card-title">
+        <div class="row">
+            {% for booking in page_obj %}
+                <div class="col-lg-6 col-md-12 mb-4">
+                    <div class="booking-card fade-in">
+                        <div class="booking-id">
+                            #{{ booking.id }}
+                        </div>
+                        <div class="booking-card-body">
+                            <div class="booking-header">
+                                <div class="booking-info">
+                                    <h5 class="booking-title">
+                                        {% if booking.package %}
+                                            {{ booking.package.name }}
+                                        {% else %}
+                                            Booking #{{ booking.id }}
+                                        {% endif %}
+                                    </h5>
+                                    
+                                    <div class="booking-detail">
+                                        <i class="fas fa-calendar-alt"></i>
+                                        <span>Travel Date:</span>
+                                        <strong>{{ booking.travel_date|date:"M d, Y" }}</strong>
+                                    </div>
+                                    
+                                    <div class="booking-detail">
+                                        <i class="fas fa-users"></i>
+                                        <span>People:</span>
+                                        <strong>{{ booking.num_people }}</strong>
+                                    </div>
+                                    
+                                    <div class="booking-detail">
+                                        <i class="fas fa-dollar-sign"></i>
+                                        <span>Total Amount:</span>
+                                        <strong class="total-amount">${{ booking.total_amount }}</strong>
+                                    </div>
+                                </div>
+                                
+                                <div class="booking-status">
+                                    <span class="status-badge {% if booking.status == 'confirmed' %}confirmed{% elif booking.status == 'pending' %}pending{% else %}cancelled{% endif %}">
+                                        {% if booking.status == 'confirmed' %}
+                                            <i class="fas fa-check-circle me-2"></i>
+                                        {% elif booking.status == 'pending' %}
+                                            <i class="fas fa-clock me-2"></i>
+                                        {% else %}
+                                            <i class="fas fa-times-circle me-2"></i>
+                                        {% endif %}
+                                        {{ booking.get_status_display }}
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div class="booking-actions">
+                                <a href="{% url 'booking_detail' booking.id %}" class="btn-view-details">
+                                    <i class="fas fa-eye me-2"></i>
+                                    View Details
+                                </a>
                                 {% if booking.package %}
-                                {{ booking.package.name }}
-                                {% else %}
-                                Booking #{{ booking.id }}
+                                    <a href="{% url 'package_detail' booking.package.id %}" class="btn-view-package">
+                                        <i class="fas fa-suitcase me-2"></i>
+                                        View Package
+                                    </a>
                                 {% endif %}
-                            </h5>
-                            <p class="card-text">
-                                <strong>Booking ID:</strong> #{{ booking.id }}<br>
-                                <strong>Travel Date:</strong> {{ booking.travel_date|date:"M d, Y" }}<br>
-                                <strong>People:</strong> {{ booking.num_people }}<br>
-                                <strong>Total:</strong> ${{ booking.total_amount }}
-                            </p>
+                            </div>
                         </div>
-                        <div class="text-end">
-                            <span
-                                class="badge {% if booking.status == 'confirmed' %}bg-success{% elif booking.status == 'pending' %}bg-warning{% else %}bg-danger{% endif %}">
-                                {{ booking.get_status_display }}
-                            </span>
-                        </div>
-                    </div>
-                    <div class="mt-3">
-                        <a href="{% url 'booking_detail' booking.id %}" class="btn btn-success btn-sm">View Details</a>
-                        {% if booking.package %}
-                        <a href="{% url 'package_detail' booking.package.id %}"
-                            class="btn btn-outline-secondary btn-sm">View Package</a>
-                        {% endif %}
                     </div>
                 </div>
-            </div>
-        </div>
-        {% endfor %}
-    </div>
-
-    {% if page_obj.has_other_pages %}
-    <nav aria-label="Page navigation">
-        <ul class="pagination justify-content-center">
-            {% if page_obj.has_previous %}
-            <li class="page-item">
-                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
-            </li>
-            {% endif %}
-
-            {% for num in page_obj.paginator.page_range %}
-            {% if page_obj.number == num %}
-            <li class="page-item active">
-                <span class="page-link">{{ num }}</span>
-            </li>
-            {% else %}
-            <li class="page-item">
-                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
-            </li>
-            {% endif %}
             {% endfor %}
+        </div>
 
-            {% if page_obj.has_next %}
-            <li class="page-item">
-                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
-            </li>
-            {% endif %}
-        </ul>
-    </nav>
-    {% endif %}
+        {% if page_obj.has_other_pages %}
+            <nav aria-label="Page navigation" class="pagination-modern">
+                <ul class="pagination">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+                                <i class="fas fa-chevron-left me-2"></i>Previous
+                            </a>
+                        </li>
+                    {% endif %}
+
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                        {% else %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+                                Next<i class="fas fa-chevron-right ms-2"></i>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
     {% else %}
-    <div class="alert alert-info">
-        <h4>No bookings yet</h4>
-        <p>You haven't made any bookings yet. <a href="{% url 'package_list' %}">Browse packages</a> to start your
-            journey!</p>
-    </div>
+        <div class="no-bookings">
+            <i class="fas fa-calendar-times"></i>
+            <h4>No Bookings Yet</h4>
+            <p>You haven't made any bookings yet. Start exploring our amazing travel packages!</p>
+            <a href="{% url 'package_list' %}" class="browse-packages-btn">
+                <i class="fas fa-search me-2"></i>
+                Browse Packages
+            </a>
+        </div>
     {% endif %}
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animate cards on scroll
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+    
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('fade-in');
+            }
+        });
+    }, observerOptions);
+    
+    document.querySelectorAll('.fade-in').forEach(element => {
+        observer.observe(element);
+    });
+    
+    // Add loading state to buttons
+    document.querySelectorAll('.btn-view-details, .btn-view-package').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const originalText = this.innerHTML;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Loading...';
+            
+            // Reset after delay in case navigation is slow
+            setTimeout(() => {
+                this.innerHTML = originalText;
+            }, 3000);
+        });
+    });
+});
+</script>
 {% endblock %}

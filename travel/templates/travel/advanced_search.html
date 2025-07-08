@@ -1,0 +1,411 @@
+{% extends 'travel/base.html' %}
+{% load static %}
+
+{% block title %}Advanced Search - Travel Management System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .search-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 3rem 0;
+        margin-bottom: 2rem;
+    }
+    
+    .search-form-container {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+    
+    .search-stats {
+        background: #f8f9fa;
+        padding: 1rem 1.5rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+        border-left: 4px solid #667eea;
+    }
+    
+    .search-input {
+        padding: 12px 16px;
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+    
+    .search-input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .search-btn {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 12px 30px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .search-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+    }
+    
+    .highlight {
+        background: #fff3cd;
+        padding: 0.1rem 0.2rem;
+        border-radius: 3px;
+        font-weight: 500;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Search Header -->
+<div class="search-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="mb-2">
+                    <i class="fas fa-search me-2"></i>Advanced Search
+                </h1>
+                <p class="mb-0 opacity-75">
+                    {% if search_query %}
+                        Showing results for "{{ search_query }}"
+                    {% else %}
+                        Find packages, hotels, destinations, and transport options
+                    {% endif %}
+                </p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <a href="{% url 'home' %}" class="btn btn-outline-light">
+                    <i class="fas fa-home me-2"></i>Back to Home
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Search Form -->
+    <div class="search-form-container">
+        <form method="get" action="{% url 'advanced_search' %}" id="advancedSearchForm">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">
+                        <i class="fas fa-search me-2 text-primary"></i>Search Keywords
+                    </label>
+                    <input type="text" name="search" class="search-input" 
+                           value="{{ search_query }}" 
+                           placeholder="Package name, destination, hotel, or description...">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">
+                        <i class="fas fa-dollar-sign me-2 text-success"></i>Min Price ($)
+                    </label>
+                    <input type="number" name="min_price" class="search-input" 
+                           value="{{ filters.min_price }}" 
+                           placeholder="0" min="0">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">
+                        <i class="fas fa-dollar-sign me-2 text-success"></i>Max Price ($)
+                    </label>
+                    <input type="number" name="max_price" class="search-input" 
+                           value="{{ filters.max_price }}" 
+                           placeholder="10000" min="0">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">
+                        <i class="fas fa-map-marker-alt me-2 text-danger"></i>Destination
+                    </label>
+                    <input type="text" name="destination" class="search-input" 
+                           value="{{ filters.destination }}" 
+                           placeholder="Enter destination...">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-semibold">
+                        <i class="fas fa-users me-2 text-info"></i>Adults
+                    </label>
+                    <input type="number" name="adults" class="search-input" 
+                           value="{{ filters.adults|default:2 }}" 
+                           min="1" max="20">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-semibold">
+                        <i class="fas fa-child me-2 text-warning"></i>Children
+                    </label>
+                    <input type="number" name="children" class="search-input" 
+                           value="{{ filters.children|default:0 }}" 
+                           min="0" max="10">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-semibold">
+                        <i class="fas fa-calendar me-2 text-secondary"></i>Duration
+                    </label>
+                    <select name="duration" class="search-input">
+                        <option value="">Any</option>
+                        <option value="1" {% if filters.duration_days == '1' %}selected{% endif %}>1 Day</option>
+                        <option value="3" {% if filters.duration_days == '3' %}selected{% endif %}>3 Days</option>
+                        <option value="7" {% if filters.duration_days == '7' %}selected{% endif %}>1 Week</option>
+                        <option value="14" {% if filters.duration_days == '14' %}selected{% endif %}>2 Weeks</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-semibold">
+                        <i class="fas fa-sort me-2 text-dark"></i>Sort By
+                    </label>
+                    <select name="sort" class="search-input">
+                        <option value="relevance" {% if filters.sort_by == 'relevance' %}selected{% endif %}>Relevance</option>
+                        <option value="price_low" {% if filters.sort_by == 'price_low' %}selected{% endif %}>Price: Low to High</option>
+                        <option value="price_high" {% if filters.sort_by == 'price_high' %}selected{% endif %}>Price: High to Low</option>
+                        <option value="rating" {% if filters.sort_by == 'rating' %}selected{% endif %}>Rating</option>
+                        <option value="name" {% if filters.sort_by == 'name' %}selected{% endif %}>Name</option>
+                    </select>
+                </div>
+                <div class="col-12">
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="search-btn">
+                            <i class="fas fa-search me-2"></i>Search All
+                        </button>
+                        <a href="{% url 'advanced_search' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-refresh me-2"></i>Clear
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Search Stats -->
+    {% if search_query or filters.destination or filters.min_price or filters.max_price %}
+        <div class="search-stats">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <strong>{{ total_results|default:0 }}</strong> results found
+                    {% if search_query %}
+                        for "<strong>{{ search_query }}</strong>"
+                    {% endif %}
+                    {% if filters.destination %}
+                        in <strong>{{ filters.destination }}</strong>
+                    {% endif %}
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <small class="text-muted">
+                        <i class="fas fa-robot me-1"></i>Powered by AI search
+                    </small>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Results Section -->
+    {% if page_obj %}
+        <div class="row">
+            {% for package in page_obj %}
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="position-relative">
+                            {% if package.is_featured %}
+                                <span class="badge bg-warning position-absolute top-0 start-0 m-2 z-index-1">
+                                    <i class="fas fa-star"></i> Featured
+                                </span>
+                            {% endif %}
+                            <span class="badge bg-primary position-absolute top-0 end-0 m-2 z-index-1">
+                                Package
+                            </span>
+                            {% if package.image %}
+                                <img src="{{ package.image.url }}" class="card-img-top" alt="{{ package.name }}" style="height: 200px; object-fit: cover;">
+                            {% else %}
+                                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                                    <i class="fas fa-suitcase fa-3x text-muted"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">{{ package.name }}</h5>
+                            <p class="card-text">{{ package.description|truncatewords:20 }}</p>
+                            <div class="mb-2">
+                                <small class="text-muted">
+                                    <i class="fas fa-map-marker-alt"></i> {{ package.destination.name }}
+                                </small>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="h5 text-success mb-0">${{ package.price }}</span>
+                                {% if package.average_rating > 0 %}
+                                    <div class="rating">
+                                        {% for i in "12345" %}
+                                            {% if forloop.counter <= package.average_rating %}
+                                                <i class="fas fa-star text-warning"></i>
+                                            {% else %}
+                                                <i class="far fa-star text-warning"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                        <small class="text-muted">({{ package.average_rating|floatformat:1 }})</small>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">
+                                    <i class="fas fa-calendar"></i> {{ package.duration_days }} day{{ package.duration_days|pluralize }}
+                                </small>
+                                <small class="text-muted">
+                                    <i class="fas fa-users"></i> Max {{ package.max_people }}
+                                </small>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a href="{% url 'package_detail' package.id %}" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-eye me-1"></i>View Details
+                                </a>
+                                {% if package.relevance_score %}
+                                    <span class="badge bg-info">
+                                        {{ package.relevance_score }}% match
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+            <nav aria-label="Search results pagination" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.previous_page_number }}">
+                                <i class="fas fa-arrow-left"></i>
+                            </a>
+                        </li>
+                    {% endif %}
+                    
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ num }}">{{ num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.next_page_number }}">
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+    {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-search fa-4x text-muted mb-3"></i>
+            <h3 class="text-muted">No results found</h3>
+            <p class="mb-4">
+                {% if search_query %}
+                    We couldn't find any results matching "{{ search_query }}". 
+                {% else %}
+                    No results match your search criteria. 
+                {% endif %}
+                Try adjusting your search terms or browse our featured content.
+            </p>
+            <div class="d-flex gap-2 justify-content-center">
+                <a href="{% url 'home' %}" class="btn btn-primary">
+                    <i class="fas fa-home me-2"></i>Back to Home
+                </a>
+                <a href="{% url 'package_list' %}" class="btn btn-outline-primary">
+                    <i class="fas fa-suitcase me-2"></i>Browse Packages
+                </a>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Highlight search terms in results
+    const searchQuery = '{{ search_query }}';
+    if (searchQuery) {
+        highlightSearchTerms(searchQuery);
+    }
+    
+    function highlightSearchTerms(query) {
+        const keywords = query.toLowerCase().split(' ').filter(word => word.length > 2);
+        const textElements = document.querySelectorAll('.card-title, .card-text');
+        
+        textElements.forEach(element => {
+            let html = element.innerHTML;
+            keywords.forEach(keyword => {
+                const regex = new RegExp(`(${keyword})`, 'gi');
+                html = html.replace(regex, '<span class="highlight">$1</span>');
+            });
+            element.innerHTML = html;
+        });
+    }
+    
+    // Auto-submit form on Enter key
+    const searchInputs = document.querySelectorAll('.search-input');
+    searchInputs.forEach(input => {
+        input.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.target.closest('form').submit();
+            }
+        });
+    });
+    
+    // Auto-submit on sort change
+    document.querySelector('select[name="sort"]').addEventListener('change', function() {
+        const form = document.getElementById('advancedSearchForm');
+        if (form.querySelector('input[name="search"]').value || 
+            form.querySelector('input[name="destination"]').value) {
+            form.submit();
+        }
+    });
+    
+    // Enhanced form validation
+    const form = document.getElementById('advancedSearchForm');
+    form.addEventListener('submit', function(e) {
+        const minPrice = parseInt(form.querySelector('input[name="min_price"]').value) || 0;
+        const maxPrice = parseInt(form.querySelector('input[name="max_price"]').value) || 999999;
+        
+        if (minPrice > maxPrice) {
+            e.preventDefault();
+            alert('Minimum price cannot be greater than maximum price.');
+            return false;
+        }
+    });
+    
+    // Smooth scrolling to results
+    if (window.location.search) {
+        setTimeout(() => {
+            const resultsSection = document.querySelector('.row');
+            if (resultsSection && resultsSection.children.length > 0) {
+                resultsSection.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start' 
+                });
+            }
+        }, 100);
+    }
+});
+</script>
+{% endblock %}

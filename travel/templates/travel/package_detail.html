@@ -4,6 +4,243 @@
 
 {% block content %}
 <style>
+    /* Image Gallery Styles */
+    .image-gallery-section {
+        margin-bottom: 40px;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+    }
+    
+    .gallery-main-image {
+        position: relative;
+        height: 60vh;
+        overflow: hidden;
+    }
+    
+    .gallery-main-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+    
+    .gallery-main-image:hover img {
+        transform: scale(1.05);
+    }
+    
+    .gallery-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(25, 135, 84, 0.6), rgba(32, 201, 151, 0.6));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .gallery-main-image:hover .gallery-overlay {
+        opacity: 1;
+    }
+    
+    .gallery-overlay-content {
+        text-align: center;
+        color: white;
+    }
+    
+    .gallery-overlay-content h2 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+    
+    .gallery-overlay-content p {
+        font-size: 1.2rem;
+        margin-bottom: 20px;
+    }
+    
+    .gallery-thumbnails {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 10px;
+        padding: 20px;
+        background: white;
+        max-height: 200px;
+        overflow-x: auto;
+    }
+    
+    .gallery-thumbnail {
+        position: relative;
+        height: 100px;
+        border-radius: 10px;
+        overflow: hidden;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: 3px solid transparent;
+    }
+    
+    .gallery-thumbnail:hover {
+        transform: scale(1.05);
+        border-color: #198754;
+    }
+    
+    .gallery-thumbnail.active {
+        border-color: #198754;
+        box-shadow: 0 4px 15px rgba(25, 135, 84, 0.3);
+    }
+    
+    .gallery-thumbnail img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .gallery-thumbnail-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .gallery-thumbnail:hover .gallery-thumbnail-overlay {
+        opacity: 1;
+    }
+    
+    .gallery-counter {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: rgba(0,0,0,0.7);
+        color: white;
+        padding: 8px 15px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+    
+    .gallery-fullscreen-btn {
+        position: absolute;
+        top: 15px;
+        left: 15px;
+        background: rgba(0,0,0,0.7);
+        color: white;
+        border: none;
+        padding: 10px;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .gallery-fullscreen-btn:hover {
+        background: rgba(25, 135, 84, 0.9);
+        transform: scale(1.1);
+    }
+    
+    /* Lightbox Modal Styles */
+    .lightbox-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.9);
+        z-index: 9999;
+        backdrop-filter: blur(10px);
+    }
+    
+    .lightbox-content {
+        position: relative;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 50px;
+    }
+    
+    .lightbox-image {
+        max-width: 90%;
+        max-height: 90%;
+        border-radius: 15px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+    
+    .lightbox-close {
+        position: absolute;
+        top: 20px;
+        right: 30px;
+        background: rgba(255,255,255,0.2);
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 50%;
+        font-size: 1.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .lightbox-close:hover {
+        background: rgba(255,255,255,0.3);
+        transform: scale(1.1);
+    }
+    
+    .lightbox-nav {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(255,255,255,0.2);
+        color: white;
+        border: none;
+        padding: 15px 20px;
+        border-radius: 10px;
+        font-size: 1.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .lightbox-nav:hover {
+        background: rgba(255,255,255,0.3);
+        transform: translateY(-50%) scale(1.1);
+    }
+    
+    .lightbox-nav.prev {
+        left: 30px;
+    }
+    
+    .lightbox-nav.next {
+        right: 30px;
+    }
+    
+    .lightbox-caption {
+        position: absolute;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0,0,0,0.7);
+        color: white;
+        padding: 15px 25px;
+        border-radius: 10px;
+        text-align: center;
+        max-width: 80%;
+    }
+
     .package-detail-hero {
         position: relative;
         height: 60vh;
@@ -428,39 +665,132 @@
     </div>
 </div>
 
-<!-- Hero Section -->
-<div class="package-detail-hero">
-    {% if package.image %}
-    <img src="{{ package.image.url }}" alt="{{ package.name }}" class="hero-image">
-    {% else %}
-    <div class="hero-image" style="background: linear-gradient(135deg, #667eea, #764ba2);"></div>
-    {% endif %}
-    
-    <div class="hero-overlay">
-        <div class="container">
-            <div class="hero-content">
-                <h1>{{ package.name }}</h1>
-                <p>{{ package.description|truncatewords:25 }}</p>
-                <div class="hero-badges">
-                    <div class="hero-badge">
-                        <i class="fas fa-map-marker-alt me-2"></i>
-                        {{ package.destination.name }}
+<!-- Image Gallery Section -->
+<div class="container-fluid p-0">
+    <div class="image-gallery-section">
+        {% if package.images.exists or package.image %}
+        <div class="gallery-main-image" id="mainGalleryImage">
+            {% if package.images.exists %}
+                {% with package.images.first as first_image %}
+                <img src="{{ first_image.image.url }}" alt="{{ first_image.caption|default:package.name }}" id="mainImage">
+                {% endwith %}
+            {% else %}
+                <img src="{{ package.image.url }}" alt="{{ package.name }}" id="mainImage">
+            {% endif %}
+            
+            <div class="gallery-overlay">
+                <div class="gallery-overlay-content">
+                    <h2>{{ package.name }}</h2>
+                    <p>{{ package.destination.name }}</p>
+                    <button class="btn btn-light btn-lg" onclick="openLightbox(0)">
+                        <i class="fas fa-expand me-2"></i>View Gallery
+                    </button>
+                </div>
+            </div>
+            
+            <div class="gallery-counter" id="galleryCounter">
+                1 / {% if package.images.exists %}{{ package.images.count }}{% else %}1{% endif %}
+            </div>
+            
+            <button class="gallery-fullscreen-btn" onclick="openLightbox(0)">
+                <i class="fas fa-expand"></i>
+            </button>
+        </div>
+        
+        {% if package.images.count > 1 or package.image and package.images.exists %}
+        <div class="gallery-thumbnails">
+            {% if package.images.exists %}
+                {% for image in package.images.all %}
+                <div class="gallery-thumbnail {% if forloop.first %}active{% endif %}" 
+                     onclick="changeMainImage('{{ image.image.url }}', '{{ image.caption|default:package.name }}', {{ forloop.counter0 }})">
+                    <img src="{{ image.image.url }}" alt="{{ image.caption|default:package.name }}">
+                    <div class="gallery-thumbnail-overlay">
+                        <i class="fas fa-expand text-white"></i>
                     </div>
-                    <div class="hero-badge">
-                        <i class="fas fa-clock me-2"></i>
-                        {{ package.duration_days }} Days
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="gallery-thumbnail active" 
+                     onclick="changeMainImage('{{ package.image.url }}', '{{ package.name }}', 0)">
+                    <img src="{{ package.image.url }}" alt="{{ package.name }}">
+                    <div class="gallery-thumbnail-overlay">
+                        <i class="fas fa-expand text-white"></i>
                     </div>
-                    <div class="hero-badge">
-                        <i class="fas fa-users me-2"></i>
-                        Up to {{ package.max_people }} People
-                    </div>
-                    <div class="hero-badge">
-                        <i class="fas fa-tag me-2"></i>
-                        {{ package.get_package_type_display }}
+                </div>
+            {% endif %}
+        </div>
+        {% endif %}
+        {% else %}
+        <div class="gallery-main-image">
+            <div class="hero-image" style="background: linear-gradient(135deg, #667eea, #764ba2); height: 60vh; display: flex; align-items: center; justify-content: center;">
+                <div class="text-center text-white">
+                    <i class="fas fa-image fa-5x mb-3 opacity-50"></i>
+                    <h3>No images available</h3>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Package Info Header -->
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="package-content-card">
+                <div class="card-body text-center">
+                    <h1 class="display-4 fw-bold text-primary mb-3">{{ package.name }}</h1>
+                    <p class="lead text-muted mb-4">{{ package.description|truncatewords:25 }}</p>
+                    <div class="row justify-content-center">
+                        <div class="col-auto">
+                            <div class="hero-badge me-3">
+                                <i class="fas fa-map-marker-alt me-2"></i>
+                                {{ package.destination.name }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <div class="hero-badge me-3">
+                                <i class="fas fa-clock me-2"></i>
+                                {{ package.duration_days }} Days
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <div class="hero-badge me-3">
+                                <i class="fas fa-users me-2"></i>
+                                Up to {{ package.max_people }} People
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <div class="hero-badge">
+                                <i class="fas fa-tag me-2"></i>
+                                {{ package.get_package_type_display }}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
+</div>
+
+<!-- Lightbox Modal -->
+<div class="lightbox-modal" id="lightboxModal">
+    <div class="lightbox-content">
+        <button class="lightbox-close" onclick="closeLightbox()">
+            <i class="fas fa-times"></i>
+        </button>
+        
+        <button class="lightbox-nav prev" onclick="previousImage()">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+        
+        <img class="lightbox-image" id="lightboxImage" src="" alt="">
+        
+        <button class="lightbox-nav next" onclick="nextImage()">
+            <i class="fas fa-chevron-right"></i>
+        </button>
+        
+        <div class="lightbox-caption" id="lightboxCaption"></div>
     </div>
 </div>
 

@@ -28,11 +28,7 @@ CSRF_TRUSTED_ORIGINS = [
     'https://80c9c11c5bef7cd05c8148b1db7b5d3d.loophole.site'
 ]
 
-ALLOWED_HOSTS = [
-    '80c9c11c5bef7cd05c8148b1db7b5d3d.loophole.site',
-    '127.0.0.1',
-    'localhost',
-]
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 

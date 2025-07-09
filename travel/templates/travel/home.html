@@ -18,90 +18,9 @@
                     </p>
                     
                     <!-- Ultra-Modern Search Component -->
-                    <div class="ultra-modern-search-container p-5 shadow-xl bg-white rounded-5 mx-auto animate-slide-up position-relative" style="max-width: 1200px; animation-delay: 0.4s;">
-                        <!-- Animated Background Elements -->
-                        <div class="search-bg-elements">
-                            <div class="floating-element element-1"></div>
-                            <div class="floating-element element-2"></div>
-                            <div class="floating-element element-3"></div>
-                        </div>
-                                                <!-- Search Suggestions Footer -->
-                        <div class="search-footer">
-                            <div class="popular-destinations">
-                                <span class="footer-label">Trending:</span>
-                                <div class="trending-tags">
-                                    <span class="trending-tag" onclick="setDestination('Hasthikuchchiya, Sri Lanka')">Hasthikuchchiya</span>
-                                    <span class="trending-tag" onclick="setDestination('Nilwala, Sri Lanka')">Nilwala Crocodile Safari Matara</span>
-                                    <span class="trending-tag" onclick="setDestination('New York, Sri Lanka')">Nuwaraeliya</span>
-                                    <span class="trending-tag" onclick="setDestination('Bolgoda, Sri Lanka')">Bolgoda</span>
-                                    <span class="trending-tag" onclick="setDestination('Panadura, Sri Lanka')">panadura jungle</span>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="ultra-modern-search-container">  
+     
                         <form method="get" action="{% url 'advanced_search' %}" id="modernSearchForm">
-                                                        <!-- Enhanced Quick Filters -->
-                            <div class="quick-filters-section">
-                                <div class="quick-filters-header">
-                                    <span class="quick-filters-title">
-                                        <i class="fas fa-magic me-2"></i>Curated Experiences:
-                                    </span>
-                                </div>
-                                <div class="quick-filters-container">
-                                    <button type="button" class="quick-filter-btn" onclick="setQuickFilter('adventure')" data-filter="adventure">
-                                        <div class="filter-icon">
-                                            <i class="fas fa-mountain"></i>
-                                        </div>
-                                        <span class="filter-text">Adventure</span>
-                                        <div class="filter-badge">Hot</div>
-                                        <div class="filter-overlay"></div>
-                                    </button>
-                                    <button type="button" class="quick-filter-btn" onclick="setQuickFilter('beach')" data-filter="beach">
-                                        <div class="filter-icon">
-                                            <i class="fas fa-umbrella-beach"></i>
-                                        </div>
-                                        <span class="filter-text">Beach</span>
-                                        <div class="filter-badge">Trending</div>
-                                        <div class="filter-overlay"></div>
-                                    </button>
-                                    <button type="button" class="quick-filter-btn" onclick="setQuickFilter('cultural')" data-filter="cultural">
-                                        <div class="filter-icon">
-                                            <i class="fas fa-university"></i>
-                                        </div>
-                                        <span class="filter-text">Cultural</span>
-                                        <div class="filter-overlay"></div>
-                                    </button>
-                                    <button type="button" class="quick-filter-btn" onclick="setQuickFilter('luxury')" data-filter="luxury">
-                                        <div class="filter-icon">
-                                            <i class="fas fa-crown"></i>
-                                        </div>
-                                        <span class="filter-text">Luxury</span>
-                                        <div class="filter-badge">Premium</div>
-                                        <div class="filter-overlay"></div>
-                                    </button>
-                                    <button type="button" class="quick-filter-btn" onclick="setQuickFilter('budget')" data-filter="budget">
-                                        <div class="filter-icon">
-                                            <i class="fas fa-wallet"></i>
-                                        </div>
-                                        <span class="filter-text">Budget</span>
-                                        <div class="filter-badge">Value</div>
-                                        <div class="filter-overlay"></div>
-                                    </button>
-                                    <button type="button" class="quick-filter-btn" onclick="setQuickFilter('romantic')" data-filter="romantic">
-                                        <div class="filter-icon">
-                                            <i class="fas fa-heart"></i>
-                                        </div>
-                                        <span class="filter-text">Romantic</span>
-                                        <div class="filter-overlay"></div>
-                                    </button>
-                                    <button type="button" class="quick-filter-btn" onclick="setQuickFilter('family')" data-filter="family">
-                                        <div class="filter-icon">
-                                            <i class="fas fa-users"></i>
-                                        </div>
-                                        <span class="filter-text">Family</span>
-                                        <div class="filter-overlay"></div>
-                                    </button>
-                                </div>
-                            </div>
                             <!-- Quick Search Mode (Default) -->
                             <div id="quickSearchMode" class="search-mode active">
                                 <!-- AI-Powered Main Search Bar -->
@@ -216,12 +135,9 @@
                                     </div>
                                 </div>
                             </div>
-
-                            
                             <!-- Enhanced Ultra-Modern Search Button -->
                             <div class="ultra-search-button-container mt-4">
                                 <button type="submit" class="ultra-search-btn" id="ultraSearchBtn">
-                                    <div class="btn-glow"></div>
                                     <span class="btn-content">
                                         <div class="btn-icon-container">
                                             <i class="fas fa-rocket btn-icon"></i>
@@ -247,11 +163,7 @@
                                     </div>
                                 </button>
                             </div>
-                            
-
                         </form>
-                        
-
                     </div>
                 </div>
             </div>
@@ -574,58 +486,6 @@
                             <small class="text-muted">Family Traveler</small>
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Newsletter Section -->
-<div class="newsletter-section py-5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-    <div class="container">
-        <div class="row align-items-center">
-            <div class="col-lg-6 text-white mb-4 mb-lg-0">
-                <h2 class="display-6 fw-bold mb-3">Stay Updated</h2>
-                <p class="lead mb-4">Get exclusive travel deals, destination guides, and insider tips delivered to your inbox.</p>
-                <div class="newsletter-benefits">
-                    <div class="d-flex align-items-center mb-2">
-                        <i class="fas fa-check-circle me-3"></i>
-                        <span>Exclusive member-only deals</span>
-                    </div>
-                    <div class="d-flex align-items-center mb-2">
-                        <i class="fas fa-check-circle me-3"></i>
-                        <span>Weekly destination spotlights</span>
-                    </div>
-                    <div class="d-flex align-items-center">
-                        <i class="fas fa-check-circle me-3"></i>
-                        <span>Early access to new packages</span>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-6">
-                <div class="newsletter-form bg-white p-4 rounded-4 shadow-lg">
-                    <h4 class="mb-3">Join Our Newsletter</h4>
-                    <form id="newsletterForm">
-                        <div class="mb-3">
-                            <input type="email" class="form-control form-control-lg" placeholder="Enter your email address" required>
-                        </div>
-                        <div class="mb-3">
-                            <select class="form-select form-select-lg">
-                                <option selected>Travel Interests</option>
-                                <option value="adventure">Adventure Travel</option>
-                                <option value="luxury">Luxury Travel</option>
-                                <option value="budget">Budget Travel</option>
-                                <option value="family">Family Travel</option>
-                                <option value="business">Business Travel</option>
-                            </select>
-                        </div>
-                        <button type="submit" class="btn btn-primary btn-lg w-100">
-                            <i class="fas fa-paper-plane me-2"></i>Subscribe Now
-                        </button>
-                        <small class="text-muted d-block mt-2">
-                            <i class="fas fa-lock me-1"></i>Your email is safe with us. No spam, ever.
-                        </small>
-                    </form>
                 </div>
             </div>
         </div>

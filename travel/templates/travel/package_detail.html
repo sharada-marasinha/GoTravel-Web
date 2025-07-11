@@ -591,6 +591,197 @@
         margin-bottom: 20px;
     }
     
+    /* Destinations, Hotels, and Transports Section Styles */
+    .destinations-section, .hotels-section, .transports-section {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        border: none;
+        overflow: hidden;
+    }
+    
+    .destinations-section .card-header,
+    .hotels-section .card-header,
+    .transports-section .card-header {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        padding: 20px 25px;
+        border: none;
+    }
+    
+    .destinations-section .card-header h5,
+    .hotels-section .card-header h5,
+    .transports-section .card-header h5 {
+        margin: 0;
+        font-size: 1.2rem;
+        font-weight: 600;
+    }
+    
+    .destination-card, .hotel-card {
+        background: #f8f9fa;
+        border-radius: 15px;
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+    
+    .destination-card:hover, .hotel-card:hover {
+        background: #e9ecef;
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+    
+    .destination-image, .hotel-image {
+        height: 100px;
+        overflow: hidden;
+        border-radius: 10px;
+    }
+    
+    .destination-image img, .hotel-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+    
+    .destination-card:hover .destination-image img,
+    .hotel-card:hover .hotel-image img {
+        transform: scale(1.1);
+    }
+    
+    .placeholder-image {
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+        border-radius: 10px;
+    }
+    
+    .destination-info, .hotel-info {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    
+    .destination-name, .hotel-name {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 8px;
+    }
+    
+    .destination-location, .hotel-location {
+        color: #718096;
+        font-size: 0.9rem;
+        margin-bottom: 8px;
+    }
+    
+    .destination-description {
+        color: #4a5568;
+        font-size: 0.9rem;
+        margin-bottom: 12px;
+        line-height: 1.4;
+    }
+    
+    .hotel-rating {
+        margin-bottom: 8px;
+    }
+    
+    .hotel-price {
+        color: #198754;
+        font-size: 1rem;
+        margin-bottom: 12px;
+    }
+    
+    .transport-card {
+        background: #f8f9fa;
+        border-radius: 15px;
+        padding: 20px;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+    }
+    
+    .transport-card:hover {
+        background: #e9ecef;
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        border-color: #667eea;
+    }
+    
+    .transport-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    
+    .transport-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 15px;
+        font-size: 1.5rem;
+        color: white;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+    }
+    
+    .transport-name {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 4px;
+    }
+    
+    .transport-type {
+        color: #718096;
+        font-size: 0.9rem;
+        margin: 0;
+    }
+    
+    .transport-route {
+        color: #4a5568;
+        margin-bottom: 15px;
+        font-weight: 500;
+    }
+    
+    .transport-times {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 15px;
+        padding: 10px;
+        background: white;
+        border-radius: 10px;
+    }
+    
+    .time-info {
+        text-align: center;
+    }
+    
+    .time-info small {
+        display: block;
+        margin-bottom: 4px;
+    }
+    
+    .time {
+        font-weight: 600;
+        color: #2d3748;
+        font-size: 1.1rem;
+    }
+    
+    .transport-price {
+        text-align: center;
+        margin-bottom: 15px;
+        color: #198754;
+        font-size: 1.2rem;
+        font-weight: 600;
+    }
+    
     .breadcrumb-nav {
         background: transparent;
         padding: 20px 0;
@@ -618,6 +809,157 @@
     .breadcrumb-nav .breadcrumb-item.active {
         color: #4a5568;
         font-weight: 600;
+    }
+    
+    /* Destinations and Hotels Sections */
+    .destination-card,
+    .hotel-card {
+        border: 1px solid #e0e0e0;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+    
+    .destination-card:hover,
+    .hotel-card:hover {
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
+    }
+    
+    .destination-image,
+    .hotel-image {
+        height: 100px;
+        overflow: hidden;
+        border-radius: 10px 0 0 10px;
+    }
+    
+    .destination-image img,
+    .hotel-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .placeholder-image {
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+        border-radius: 10px 0 0 10px;
+    }
+    
+    .destination-name,
+    .hotel-name {
+        color: #2c3e50;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+    
+    .destination-location,
+    .hotel-location {
+        color: #7f8c8d;
+        font-size: 0.9rem;
+        margin-bottom: 8px;
+    }
+    
+    .destination-description {
+        color: #34495e;
+        font-size: 0.85rem;
+        margin-bottom: 10px;
+        line-height: 1.4;
+    }
+    
+    .hotel-rating {
+        font-size: 0.9rem;
+    }
+    
+    .hotel-price {
+        color: #27ae60;
+        font-size: 0.9rem;
+        margin-bottom: 10px;
+    }
+    
+    /* Transport Cards */
+    .transport-card {
+        border: 1px solid #e0e0e0;
+        border-radius: 10px;
+        padding: 15px;
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+    
+    .transport-card:hover {
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
+    }
+    
+    .transport-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    
+    .transport-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #3498db, #2980b9);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
+        margin-right: 12px;
+    }
+    
+    .transport-name {
+        color: #2c3e50;
+        font-weight: 600;
+        margin-bottom: 2px;
+    }
+    
+    .transport-type {
+        color: #7f8c8d;
+        font-size: 0.85rem;
+        margin: 0;
+    }
+    
+    .transport-route {
+        color: #34495e;
+        font-size: 0.9rem;
+        margin-bottom: 10px;
+    }
+    
+    .transport-times {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+    }
+    
+    .time-info {
+        text-align: center;
+    }
+    
+    .time-info small {
+        display: block;
+        font-size: 0.75rem;
+    }
+    
+    .time-info .time {
+        font-weight: 600;
+        color: #2c3e50;
+        font-size: 0.9rem;
+    }
+    
+    .transport-price {
+        text-align: center;
+        color: #27ae60;
+        font-size: 1.1rem;
+        margin-bottom: 15px;
     }
     
     @media (max-width: 768px) {
@@ -668,10 +1010,10 @@
 <!-- Image Gallery Section -->
 <div class="container-fluid p-0">
     <div class="image-gallery-section">
-        {% if package.images.exists or package.image %}
+        {% if gallery_images or package.image %}
         <div class="gallery-main-image" id="mainGalleryImage">
-            {% if package.images.exists %}
-                {% with package.images.first as first_image %}
+            {% if gallery_images %}
+                {% with gallery_images|first as first_image %}
                 <img src="{{ first_image.image.url }}" alt="{{ first_image.caption|default:package.name }}" id="mainImage">
                 {% endwith %}
             {% else %}
@@ -681,7 +1023,7 @@
             <div class="gallery-overlay">
                 <div class="gallery-overlay-content">
                     <h2>{{ package.name }}</h2>
-                    <p>{{ package.destination.name }}</p>
+                    <p>{% for dest in package.destinations.all %}{{ dest.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
                     <button class="btn btn-light btn-lg" onclick="openLightbox(0)">
                         <i class="fas fa-expand me-2"></i>View Gallery
                     </button>
@@ -689,7 +1031,7 @@
             </div>
             
             <div class="gallery-counter" id="galleryCounter">
-                1 / {% if package.images.exists %}{{ package.images.count }}{% else %}1{% endif %}
+                1 / {% if gallery_images %}{{ gallery_images.count }}{% else %}1{% endif %}
             </div>
             
             <button class="gallery-fullscreen-btn" onclick="openLightbox(0)">
@@ -697,10 +1039,10 @@
             </button>
         </div>
         
-        {% if package.images.count > 1 or package.image and package.images.exists %}
+        {% if gallery_images.count > 1 or package.image and gallery_images %}
         <div class="gallery-thumbnails">
-            {% if package.images.exists %}
-                {% for image in package.images.all %}
+            {% if gallery_images %}
+                {% for image in gallery_images %}
                 <div class="gallery-thumbnail {% if forloop.first %}active{% endif %}" 
                      onclick="changeMainImage('{{ image.image.url }}', '{{ image.caption|default:package.name }}', {{ forloop.counter0 }})">
                     <img src="{{ image.image.url }}" alt="{{ image.caption|default:package.name }}">
@@ -745,7 +1087,7 @@
                         <div class="col-auto">
                             <div class="hero-badge me-3">
                                 <i class="fas fa-map-marker-alt me-2"></i>
-                                {{ package.destination.name }}
+                                {% for dest in package.destinations.all %}{{ dest.name }}{% if not forloop.last %}, {% endif %}{% endfor %}
                             </div>
                         </div>
                         <div class="col-auto">
@@ -826,8 +1168,13 @@
                     <div class="package-info-grid">
                         <div class="info-item">
                             <i class="fas fa-map-marker-alt"></i>
-                            <h5>Destination</h5>
-                            <p>{{ package.destination.name }}<br>{{ package.destination.city }}, {{ package.destination.country }}</p>
+                            <h5>Destination{{ package.destinations.count|pluralize }}</h5>
+                            <p>
+                                {% for dest in package.destinations.all %}
+                                    {{ dest.name }}<br>{{ dest.city }}, {{ dest.country }}
+                                    {% if not forloop.last %}<br><br>{% endif %}
+                                {% endfor %}
+                            </p>
                         </div>
                         <div class="info-item">
                             <i class="fas fa-clock"></i>
@@ -871,6 +1218,175 @@
                     {% endif %}
                 </div>
             </div>
+
+            <!-- Destinations Section -->
+            {% if package.destinations.exists %}
+            <div class="destinations-section card mt-4">
+                <div class="card-header">
+                    <h5>
+                        <i class="fas fa-map-marker-alt me-2"></i>
+                        Destinations ({{ package.destinations.count }})
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for destination in package.destinations.all %}
+                        <div class="col-md-6 mb-3">
+                            <div class="destination-card">
+                                <div class="row g-0">
+                                    <div class="col-4">
+                                        <div class="destination-image">
+                                            {% if destination.image %}
+                                                <img src="{{ destination.image.url }}" alt="{{ destination.name }}" class="img-fluid rounded">
+                                            {% else %}
+                                                <div class="placeholder-image">
+                                                    <i class="fas fa-map-marker-alt"></i>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="col-8">
+                                        <div class="destination-info p-3">
+                                            <h6 class="destination-name">{{ destination.name }}</h6>
+                                            <p class="destination-location">
+                                                <i class="fas fa-map-pin me-1"></i>
+                                                {{ destination.city }}, {{ destination.country }}
+                                            </p>
+                                            <p class="destination-description">{{ destination.description|truncatewords:15 }}</p>
+                                            <a href="{% url 'destination_detail' destination.id %}" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye me-1"></i>View Details
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Hotels Section -->
+            {% if package.hotels.exists %}
+            <div class="hotels-section card mt-4">
+                <div class="card-header">
+                    <h5>
+                        <i class="fas fa-hotel me-2"></i>
+                        Included Hotels ({{ package.hotels.count }})
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for hotel in package.hotels.all %}
+                        <div class="col-md-6 mb-3">
+                            <div class="hotel-card">
+                                <div class="row g-0">
+                                    <div class="col-4">
+                                        <div class="hotel-image">
+                                            {% if hotel.image %}
+                                                <img src="{{ hotel.image.url }}" alt="{{ hotel.name }}" class="img-fluid rounded">
+                                            {% else %}
+                                                <div class="placeholder-image">
+                                                    <i class="fas fa-hotel"></i>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="col-8">
+                                        <div class="hotel-info p-3">
+                                            <h6 class="hotel-name">{{ hotel.name }}</h6>
+                                            <div class="hotel-rating mb-2">
+                                                {% for i in "12345" %}
+                                                    {% if forloop.counter <= hotel.star_rating %}
+                                                        <i class="fas fa-star text-warning"></i>
+                                                    {% else %}
+                                                        <i class="far fa-star text-muted"></i>
+                                                    {% endif %}
+                                                {% endfor %}
+                                                <span class="ms-1 text-muted">({{ hotel.star_rating }} stars)</span>
+                                            </div>
+                                            <p class="hotel-location">
+                                                <i class="fas fa-map-pin me-1"></i>
+                                                {{ hotel.destination.name }}
+                                            </p>
+                                            <p class="hotel-price">
+                                                <strong>${{ hotel.price_per_night }}</strong> <small class="text-muted">per night</small>
+                                            </p>
+                                            <a href="{% url 'hotel_detail' hotel.id %}" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye me-1"></i>View Hotel
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Transports Section -->
+            {% if package.transports.exists %}
+            <div class="transports-section card mt-4">
+                <div class="card-header">
+                    <h5>
+                        <i class="fas fa-route me-2"></i>
+                        Included Transportation ({{ package.transports.count }})
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for transport in package.transports.all %}
+                        <div class="col-md-6 mb-3">
+                            <div class="transport-card">
+                                <div class="transport-header">
+                                    <div class="transport-icon">
+                                        {% if transport.transport_type == 'flight' %}
+                                            <i class="fas fa-plane"></i>
+                                        {% elif transport.transport_type == 'bus' %}
+                                            <i class="fas fa-bus"></i>
+                                        {% elif transport.transport_type == 'train' %}
+                                            <i class="fas fa-train"></i>
+                                        {% else %}
+                                            <i class="fas fa-car"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div class="transport-info">
+                                        <h6 class="transport-name">{{ transport.name }}</h6>
+                                        <p class="transport-type">{{ transport.get_transport_type_display }}</p>
+                                    </div>
+                                </div>
+                                <div class="transport-details">
+                                    <p class="transport-route">
+                                        <i class="fas fa-map-marker-alt me-1"></i>
+                                        {{ transport.from_destination.name }} → {{ transport.to_destination.name }}
+                                    </p>
+                                    <div class="transport-times">
+                                        <div class="time-info">
+                                            <small class="text-muted">Departure</small>
+                                            <div class="time">{{ transport.departure_time|time:"H:i" }}</div>
+                                        </div>
+                                        <div class="time-info">
+                                            <small class="text-muted">Arrival</small>
+                                            <div class="time">{{ transport.arrival_time|time:"H:i" }}</div>
+                                        </div>
+                                    </div>
+                                    <div class="transport-price">
+                                        <strong>${{ transport.price }}</strong>
+                                    </div>
+                                </div>
+                                <a href="{% url 'transport_detail' transport.id %}" class="btn btn-sm btn-outline-primary w-100">
+                                    <i class="fas fa-eye me-1"></i>View Transport Details
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
 
             <!-- Enhanced Reviews Section -->
             <div class="reviews-section card">
@@ -994,7 +1510,234 @@
 </div>
 
 <script>
+    // Gallery functionality
+    let currentImageIndex = 0;
+    let galleryImages = [];
+    
+    // Initialize gallery images array
+    {% if gallery_images %}
+    galleryImages = [
+        {% for image in gallery_images %}
+        {
+            src: "{{ image.image.url }}",
+            caption: "{{ image.caption|default:package.name }}"
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ];
+    {% elif package.image %}
+    galleryImages = [
+        {
+            src: "{{ package.image.url }}",
+            caption: "{{ package.name }}"
+        }
+    ];
+    {% endif %}
+    
+    // Change main image function
+    function changeMainImage(src, caption, index) {
+        const mainImage = document.getElementById('mainImage');
+        const counter = document.getElementById('galleryCounter');
+        
+        if (mainImage) {
+            mainImage.src = src;
+            mainImage.alt = caption;
+        }
+        
+        if (counter) {
+            counter.textContent = `${index + 1} / ${galleryImages.length}`;
+        }
+        
+        currentImageIndex = index;
+        
+        // Update active thumbnail
+        document.querySelectorAll('.gallery-thumbnail').forEach((thumb, i) => {
+            if (i === index) {
+                thumb.classList.add('active');
+            } else {
+                thumb.classList.remove('active');
+            }
+        });
+    }
+    
+    // Open lightbox function
+    function openLightbox(index) {
+        if (galleryImages.length === 0) return;
+        
+        currentImageIndex = index;
+        
+        // Create lightbox if it doesn't exist
+        let lightbox = document.getElementById('lightbox');
+        if (!lightbox) {
+            lightbox = document.createElement('div');
+            lightbox.id = 'lightbox';
+            lightbox.className = 'lightbox';
+            lightbox.innerHTML = `
+                <div class="lightbox-content">
+                    <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
+                    <button class="lightbox-nav lightbox-prev" onclick="changeLightboxImage(-1)">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <img id="lightbox-image" src="" alt="">
+                    <button class="lightbox-nav lightbox-next" onclick="changeLightboxImage(1)">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                    <div class="lightbox-counter">
+                        <span id="lightbox-counter">1 / 1</span>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(lightbox);
+            
+            // Add lightbox styles
+            const lightboxStyles = `
+                .lightbox {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0, 0, 0, 0.9);
+                    z-index: 9999;
+                    display: none;
+                    align-items: center;
+                    justify-content: center;
+                }
+                
+                .lightbox-content {
+                    position: relative;
+                    max-width: 90%;
+                    max-height: 90%;
+                }
+                
+                .lightbox img {
+                    max-width: 100%;
+                    max-height: 100%;
+                    border-radius: 10px;
+                }
+                
+                .lightbox-close {
+                    position: absolute;
+                    top: -40px;
+                    right: 0;
+                    color: white;
+                    font-size: 2rem;
+                    cursor: pointer;
+                    background: none;
+                    border: none;
+                    padding: 10px;
+                }
+                
+                .lightbox-nav {
+                    position: absolute;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    background: rgba(255, 255, 255, 0.2);
+                    border: none;
+                    color: white;
+                    font-size: 2rem;
+                    padding: 15px 20px;
+                    cursor: pointer;
+                    border-radius: 50%;
+                    transition: background 0.3s ease;
+                }
+                
+                .lightbox-nav:hover {
+                    background: rgba(255, 255, 255, 0.3);
+                }
+                
+                .lightbox-prev {
+                    left: -60px;
+                }
+                
+                .lightbox-next {
+                    right: -60px;
+                }
+                
+                .lightbox-counter {
+                    position: absolute;
+                    bottom: -40px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    color: white;
+                    background: rgba(0, 0, 0, 0.5);
+                    padding: 5px 15px;
+                    border-radius: 20px;
+                    font-size: 0.9rem;
+                }
+            `;
+            
+            const style = document.createElement('style');
+            style.textContent = lightboxStyles;
+            document.head.appendChild(style);
+        }
+        
+        const lightboxImage = document.getElementById('lightbox-image');
+        const counter = document.getElementById('lightbox-counter');
+        
+        lightboxImage.src = galleryImages[index].src;
+        lightboxImage.alt = galleryImages[index].caption;
+        counter.textContent = `${index + 1} / ${galleryImages.length}`;
+        
+        lightbox.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+    
+    // Close lightbox function
+    function closeLightbox() {
+        const lightbox = document.getElementById('lightbox');
+        if (lightbox) {
+            lightbox.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+    }
+    
+    // Change lightbox image function
+    function changeLightboxImage(direction) {
+        currentImageIndex += direction;
+        
+        if (currentImageIndex >= galleryImages.length) {
+            currentImageIndex = 0;
+        } else if (currentImageIndex < 0) {
+            currentImageIndex = galleryImages.length - 1;
+        }
+        
+        const lightboxImage = document.getElementById('lightbox-image');
+        const counter = document.getElementById('lightbox-counter');
+        
+        if (lightboxImage && counter) {
+            lightboxImage.src = galleryImages[currentImageIndex].src;
+            lightboxImage.alt = galleryImages[currentImageIndex].caption;
+            counter.textContent = `${currentImageIndex + 1} / ${galleryImages.length}`;
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
+        // Keyboard navigation for lightbox
+        document.addEventListener('keydown', function(e) {
+            const lightbox = document.getElementById('lightbox');
+            if (lightbox && lightbox.style.display === 'flex') {
+                switch(e.key) {
+                    case 'Escape':
+                        closeLightbox();
+                        break;
+                    case 'ArrowLeft':
+                        changeLightboxImage(-1);
+                        break;
+                    case 'ArrowRight':
+                        changeLightboxImage(1);
+                        break;
+                }
+            }
+        });
+        
+        // Close lightbox when clicking outside image
+        document.addEventListener('click', function(e) {
+            const lightbox = document.getElementById('lightbox');
+            if (e.target === lightbox) {
+                closeLightbox();
+            }
+        });
+        
         // Smooth scrolling for internal links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {

@@ -70,7 +70,7 @@ def package_list(request):
     if search_query:
         packages = packages.filter(
             Q(name__icontains=search_query) |
-            Q(destination__name__icontains=search_query) |
+            Q(destinations__name__icontains=search_query) |
             Q(description__icontains=search_query)
         )
     
@@ -78,7 +78,7 @@ def package_list(request):
     destination_id = request.GET.get('destination', '')
     if destination_id:
         try:
-            packages = packages.filter(destination_id=int(destination_id))
+            packages = packages.filter(destinations=int(destination_id))
         except (ValueError, TypeError):
             pass
     
@@ -119,18 +119,23 @@ def package_list(request):
     return HttpResponse(template.render(context, request))
 
 def package_detail(request, package_id):
-    """Package detail page with booking and reviews"""
+    """Package detail page with booking, reviews, and gallery"""
     try:
         package = get_object_or_404(Package, id=package_id, is_active=True)
         reviews = Review.objects.filter(package=package).order_by('-created_at')
-    except:
+        # Get all images for the package (PackageImage model, related_name='images')
+        gallery_images = package.images.all()
+    except Exception as e:
+        print(f"Error in package_detail: {e}")
         package = None
         reviews = []
+        gallery_images = []
     
     template = loader.get_template('travel/package_detail.html')
     context = {
         'package': package,
         'reviews': reviews,
+        'gallery_images': gallery_images,
     }
     return HttpResponse(template.render(context, request))
 
@@ -240,18 +245,24 @@ def destinations(request):
     return HttpResponse(template.render(context, request))
 
 def destination_detail(request, destination_id):
-    """Destination detail with packages"""
+    """Destination detail with packages and gallery"""
     try:
         destination = get_object_or_404(Destination, id=destination_id, is_active=True)
-        packages = Package.objects.filter(destination=destination, is_active=True)
-    except:
+        # Fix: Use destinations (plural) as it's a many-to-many field
+        packages = Package.objects.filter(destinations=destination, is_active=True)
+        # Get all images for the destination (DestinationImage model, related_name='images')
+        gallery_images = destination.images.all()
+    except Exception as e:
+        print(f"Error in destination_detail: {e}")
         destination = None
         packages = []
+        gallery_images = []
     
     template = loader.get_template('travel/destination_detail.html')
     context = {
         'destination': destination,
         'packages': packages,
+        'gallery_images': gallery_images,
     }
     return HttpResponse(template.render(context, request))
 
@@ -523,18 +534,23 @@ def hotel_detail(request, hotel_id):
         hotel = get_object_or_404(Hotel, id=hotel_id, is_active=True)
         # Get packages that include this hotel or are in the same destination
         packages = Package.objects.filter(
-            destination=hotel.destination, 
+            hotels=hotel,
             is_active=True,
             package_type__in=['hotel', 'combo']
         )
-    except:
+        # Get all images for the hotel (HotelImage model, related_name='images')
+        gallery_images = hotel.images.all()
+    except Exception as e:
+        print(f"Error in hotel_detail: {e}")
         hotel = None
         packages = []
+        gallery_images = []
     
     template = loader.get_template('travel/hotel_detail.html')
     context = {
         'hotel': hotel,
         'packages': packages,
+        'gallery_images': gallery_images,
     }
     return HttpResponse(template.render(context, request))
 
@@ -599,7 +615,7 @@ def transport_detail(request, transport_id):
         transport = get_object_or_404(Transport, id=transport_id, is_active=True)
         # Get packages that include this transport or are in the same destination
         packages = Package.objects.filter(
-            Q(destination=transport.from_destination) | Q(destination=transport.to_destination),
+            Q(destinations=transport.from_destination) | Q(destinations=transport.to_destination),
             is_active=True,
             package_type__in=['transport', 'combo']
         )
@@ -709,17 +725,17 @@ def advanced_search(request):
                 packages = packages.filter(
                     Q(name__icontains=search_query) |
                     Q(description__icontains=search_query) |
-                    Q(destination__name__icontains=search_query) |
-                    Q(destination__city__icontains=search_query) |
-                    Q(destination__country__icontains=search_query)
+                    Q(destinations__name__icontains=search_query) |
+                    Q(destinations__city__icontains=search_query) |
+                    Q(destinations__country__icontains=search_query)
                 )
             
             # Apply basic filters
             if filters['destination']:
                 packages = packages.filter(
-                    Q(destination__name__icontains=filters['destination']) |
-                    Q(destination__city__icontains=filters['destination']) |
-                    Q(destination__country__icontains=filters['destination'])
+                    Q(destinations__name__icontains=filters['destination']) |
+                    Q(destinations__city__icontains=filters['destination']) |
+                    Q(destinations__country__icontains=filters['destination'])
                 )
             
             if filters['min_price']:
@@ -795,70 +811,6 @@ def advanced_search(request):
                 'error': f'Search error: {str(fallback_error)}',
             }
             return HttpResponse(template.render(context, request))
-            
-            # Apply basic filters
-            if filters.get('destination'):
-                packages = packages.filter(
-                    Q(destination__name__icontains=filters['destination']) |
-                    Q(destination__city__icontains=filters['destination']) |
-                    Q(destination__country__icontains=filters['destination'])
-                )
-            
-            if filters.get('min_price'):
-                try:
-                    packages = packages.filter(price__gte=float(filters['min_price']))
-                except (ValueError, TypeError):
-                    pass
-            
-            if filters.get('max_price'):
-                try:
-                    packages = packages.filter(price__lte=float(filters['max_price']))
-                except (ValueError, TypeError):
-                    pass
-            
-            if filters.get('max_people'):
-                try:
-                    packages = packages.filter(max_people__gte=int(filters['max_people']))
-                except (ValueError, TypeError):
-                    pass
-            
-            packages = packages.order_by('name')
-            
-            # Pagination
-            paginator = Paginator(packages, 12)
-            page_number = request.GET.get('page')
-            page_obj = paginator.get_page(page_number)
-            
-            destinations = Destination.objects.filter(is_active=True)
-            
-            template = loader.get_template('travel/advanced_search.html')
-            context = {
-                'page_obj': page_obj,
-                'destinations': destinations,
-                'search_query': search_query,
-                'search_type': search_type,
-                'filters': filters,
-                'search_suggestions': [],
-                'search_keywords': [],
-                'total_results': packages.count(),
-            }
-            return HttpResponse(template.render(context, request))
-            
-        except Exception as fallback_error:
-            # Ultimate fallback
-            template = loader.get_template('travel/advanced_search.html')
-            context = {
-                'page_obj': None,
-                'destinations': [],
-                'search_query': search_query,
-                'search_type': search_type,
-                'filters': filters,
-                'search_suggestions': [],
-                'search_keywords': [],
-                'total_results': 0,
-                'error': 'Search temporarily unavailable. Please try again later.'
-            }
-            return HttpResponse(template.render(context, request))
 
 
 def keyword_search(request):
@@ -882,7 +834,7 @@ def keyword_search(request):
         results_data = [{
             'id': p.id,
             'name': p.name,
-            'destination': str(p.destination),
+            'destination': ', '.join([str(dest) for dest in p.destinations.all()]),
             'price': float(p.price),
             'duration': p.duration_days,
             'image': p.image.url if p.image else None,
@@ -956,30 +908,6 @@ def search_autocomplete(request):
         'suggestions': suggestions,
         'query': query
     })
-    
-    # Pagination
-    paginator = Paginator(packages, 12)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    
-    template = loader.get_template('travel/advanced_search.html')
-    context = {
-        'page_obj': page_obj,
-        'destinations': destinations,
-        'search_query': search_query,
-        'destination_query': destination_query,
-        'start_date': start_date,
-        'end_date': end_date,
-        'adults': adults,
-        'children': children,
-        'min_price': min_price,
-        'max_price': max_price,
-        'package_type': package_type,
-        'duration_days': duration_days,
-        'sort_by': sort_by,
-        'total_results': packages.count() if packages else 0,
-    }
-    return HttpResponse(template.render(context, request))
 
 @csrf_exempt
 def destination_suggestions(request):
@@ -1068,16 +996,22 @@ def package_search_api(request):
         # Prepare response data
         results = []
         for package in packages:
+            # Get first destination for API compatibility
+            first_destination = package.destinations.first()
+            destination_data = {}
+            if first_destination:
+                destination_data = {
+                    'id': first_destination.id,
+                    'name': first_destination.name,
+                    'city': first_destination.city,
+                    'country': first_destination.country,
+                    'full_name': str(first_destination)
+                }
+            
             results.append({
                 'id': package.id,
                 'name': package.name,
-                'destination': {
-                    'id': package.destination.id,
-                    'name': package.destination.name,
-                    'city': package.destination.city,
-                    'country': package.destination.country,
-                    'full_name': str(package.destination)
-                },
+                'destination': destination_data,
                 'price': float(package.price),
                 'duration_days': package.duration_days,
                 'max_people': package.max_people,
@@ -1140,7 +1074,7 @@ def keyword_search(request):
             results_data = [{
                 'id': p.id,
                 'name': p.name,
-                'destination': str(p.destination),
+                'destination': ', '.join([str(dest) for dest in p.destinations.all()]),
                 'price': float(p.price),
                 'duration': p.duration_days,
                 'image_url': p.image.url if p.image else None,

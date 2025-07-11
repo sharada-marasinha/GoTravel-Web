@@ -7,7 +7,31 @@
     <div class="row">
         <div class="col-md-8">
             <div class="card">
-                {% if hotel.image %}
+                <!-- Hotel Gallery Carousel -->
+                {% if gallery_images and gallery_images|length > 0 %}
+                <div id="hotelGalleryCarousel" class="carousel slide mb-3" data-bs-ride="carousel">
+                  <div class="carousel-inner">
+                    {% for img in gallery_images %}
+                      <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                        <img src="{{ img.image.url }}" class="d-block w-100" alt="{{ img.caption|default:hotel.name }}" style="height: 400px; object-fit: cover;">
+                        {% if img.caption %}
+                        <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-50 rounded">
+                          <p class="mb-0">{{ img.caption }}</p>
+                        </div>
+                        {% endif %}
+                      </div>
+                    {% endfor %}
+                  </div>
+                  <button class="carousel-control-prev" type="button" data-bs-target="#hotelGalleryCarousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Previous</span>
+                  </button>
+                  <button class="carousel-control-next" type="button" data-bs-target="#hotelGalleryCarousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Next</span>
+                  </button>
+                </div>
+                {% elif hotel.image %}
                     <img src="{{ hotel.image.url }}" class="card-img-top" alt="{{ hotel.name }}" style="height: 400px; object-fit: cover;">
                 {% else %}
                     <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 400px;">

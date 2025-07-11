@@ -16,7 +16,7 @@ class PackageAdminForm(ModelForm):
         hotels = cleaned_data.get('hotels')
         
         # Check if hotels is provided and has at least one hotel
-        if not hotels or hotels.count() == 0:
+        if not hotels:
             raise ValidationError({
                 'hotels': 'At least one hotel must be selected for this package.'
             })

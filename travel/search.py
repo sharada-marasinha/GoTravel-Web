@@ -585,15 +585,21 @@ class TravelSearchEngine:
         
         # Package suggestions
         packages = Package.objects.filter(
-            Q(name__icontains=query) | Q(destination__name__icontains=query),
+            Q(name__icontains=query) | Q(destinations__name__icontains=query),
             is_active=True
-        )[:limit//2]
+        ).distinct()[:limit//2]
         
         for package in packages:
+            # Get the first destination for display (if exists)
+            primary_dest = package.destinations.first()
+            if primary_dest:
+                dest_display = f"{primary_dest.name}, {primary_dest.city}"
+            else:
+                dest_display = ""
             suggestions.append({
                 'text': package.name,
                 'type': 'package',
-                'destination': f"{package.destination.name}, {package.destination.city}",
+                'destination': dest_display,
                 'price': package.price
             })
         

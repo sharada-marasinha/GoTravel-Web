@@ -95,23 +95,13 @@ class Package(models.Model):
     def clean(self):
         """Custom validation to ensure at least one hotel is selected"""
         super().clean()
-        # Check if this is an update (instance has primary key)
-        if self.pk:
-            if not self.hotels.exists():
-                raise ValidationError({
-                    'hotels': 'At least one hotel must be selected for this package.'
-                })
+        # Skip validation if this is being called from admin form save
+        # The admin form has its own validation that handles this better
+        pass
     
     def save(self, *args, **kwargs):
-        """Override save to ensure validation is called"""
-        # For new instances, we can't validate ManyToMany until after save
-        is_new = self.pk is None
+        """Override save method"""
         super().save(*args, **kwargs)
-        
-        # For new instances, validate after save when ManyToMany can be accessed
-        if is_new:
-            if not self.hotels.exists():
-                raise ValidationError('At least one hotel must be selected for this package.')
     
     def average_rating(self):
         reviews = self.review_set.all()
